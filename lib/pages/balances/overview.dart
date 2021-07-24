@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'package:portfolio_n_budget/api/gsheets.dart';
 import 'package:portfolio_n_budget/constants.dart';
 import 'package:portfolio_n_budget/credentials.dart';
+import 'package:portfolio_n_budget/utils/credentials_secure_storage.dart';
 import 'package:portfolio_n_budget/widgets/forstedAppBar.dart';
 
 import 'row.dart';
@@ -47,8 +50,11 @@ class _BalancesOverviewState extends State<BalancesOverview>
   }
 
   Future<void> _getData() async {
-    final gsheets = GSheets(CREDENTIALS);
-    spreadsheet = await gsheets.spreadsheet(SPREADSHEET_ID);
+    var credentials = await CredentialsSecureStorage.getCredentials();
+    var sheetID = await CredentialsSecureStorage.getSheetID();
+
+    final gsheets = GSheets(credentials);
+    spreadsheet = await gsheets.spreadsheet(sheetID!);
 
     assetManagementSheet =
         spreadsheet.worksheetByTitle(WORKSHEET_TITLES.ASSET_MANAGEMENT);

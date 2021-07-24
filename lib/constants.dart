@@ -1,8 +1,9 @@
 import 'package:intl/intl.dart';
 
-const SPREADSHEET_ID = "1YapCw2Uy2u59sxYxAD5pccJipUEKQVLzzZfB5AW0f1E";
-
 const _sheetsEndpoint = 'https://sheets.googleapis.com/v4/spreadsheets/';
+
+const CREDENTIALS_KEY = '_ck';
+const SHEET_ID_KEY = '_sid';
 
 class WORKSHEET_TITLES {
   static const ASSET_MANAGEMENT = "Asset Management";

@@ -42,18 +42,18 @@ jobs:
     needs: createTag-milestoneClose
     runs-on: ubuntu-latest
     steps:
-#       - name: Get latest published release tag
-#         id: get_latest_release
-#         uses: pozetroninc/github-action-get-latest-release@v0.5.0
-#         with:
-#           repository: ${{ github.repository }}
-#           excludes: draft
+      - name: Get latest published release tag
+        id: get_latest_release
+        uses: pozetroninc/github-action-get-latest-release@v0.5.0
+        with:
+          repository: ${{ github.repository }}
+          excludes: draft
       - name: Generate changelog since last published release
         uses: charmixer/auto-changelog-action@v1
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           future_release: $NEW_TAG
-#           since_tag: ${{ steps.get_latest_release.outputs.release }}
+          since_tag: ${{ steps.get_latest_release.outputs.release }}
       - name: Upload changelog
         uses: actions/upload-artifact@v2
         with:

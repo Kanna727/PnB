@@ -1,4 +1,3 @@
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -37,11 +36,13 @@ class _DateTimePickerState extends State<DateTimePicker> {
         initialDatePickerMode: DatePickerMode.day,
         firstDate: DateTime(2015),
         lastDate: DateTime(2101));
-    if (picked != null)
+    if (picked != null) {
       setState(() {
         selectedDate = picked;
         _dateController.text = DateFormat(DATE_FORMAT).format(selectedDate);
       });
+      widget.onChange(DateFormat(DATE_FORMAT).format(selectedDate));
+    }
   }
 
   @override
@@ -65,7 +66,6 @@ class _DateTimePickerState extends State<DateTimePicker> {
         enabled: false,
         keyboardType: TextInputType.datetime,
         controller: _dateController,
-        onSaved: widget.onChange,
         decoration: InputDecoration(
           border: OutlineInputBorder(),
           labelText: widget.title,

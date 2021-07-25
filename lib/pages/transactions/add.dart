@@ -148,7 +148,7 @@ class _AddTransactionState extends State<AddTransaction> {
 
   void onDateChange(String? newValue) {
     setState(() {
-      date = newValue!;
+      date = newValue;
     });
   }
 

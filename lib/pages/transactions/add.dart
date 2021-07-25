@@ -234,6 +234,27 @@ class _AddTransactionState extends State<AddTransaction> {
                           ),
                         ),
                         Visibility(
+                          visible: !(type == TYPES_CLASS.SELF_TRANSFER ||
+                              type == TYPES_CLASS.REWARD_POINTS),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Dropdown(
+                              dropdownValue: item,
+                              onChange: onItemChange,
+                              list: isSaving || !itemsFetched ? null : items,
+                              title: UI_TEXTS.ITEM,
+                              validator: (value) {
+                                if (type == TYPES_CLASS.SELF_TRANSFER)
+                                  return null;
+                                if (value == null || value.isEmpty) {
+                                  return UI_TEXTS.ITEM_ERROR;
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ),
+                        Visibility(
                           visible: !(type == TYPES_CLASS.INCOME ||
                               type == TYPES_CLASS.REWARD_POINTS),
                           child: Padding(
@@ -270,27 +291,6 @@ class _AddTransactionState extends State<AddTransaction> {
                                     type == TYPES_CLASS.LIABILITY) return null;
                                 if (value == null || value.isEmpty) {
                                   return UI_TEXTS.CREDIT_ACCOUNT_ERROR;
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ),
-                        Visibility(
-                          visible: !(type == TYPES_CLASS.SELF_TRANSFER ||
-                              type == TYPES_CLASS.REWARD_POINTS),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Dropdown(
-                              dropdownValue: item,
-                              onChange: onItemChange,
-                              list: isSaving || !itemsFetched ? null : items,
-                              title: UI_TEXTS.ITEM,
-                              validator: (value) {
-                                if (type == TYPES_CLASS.SELF_TRANSFER)
-                                  return null;
-                                if (value == null || value.isEmpty) {
-                                  return UI_TEXTS.ITEM_ERROR;
                                 }
                                 return null;
                               },

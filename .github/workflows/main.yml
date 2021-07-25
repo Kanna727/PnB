@@ -1,36 +1,59 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: CI Test
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    # Sequence of patterns matched against refs/tags
-    tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  pull_request:
+    types: [closed]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  NEW_TAG: refs/tags/${{ github.event.pull_request.title }}
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  generate-changelog:
-    name: Generate CHANGELOG
+  createTag-milestoneClose:
+    name: Creates Tag & Closes Milestone
     runs-on: ubuntu-latest
     steps:
-      - name: Get latest published release tag
-        id: get_latest_release
-        uses: pozetroninc/github-action-get-latest-release@v0.5.0
-        with:
-          repository: ${{ github.repository }}
-          excludes: draft
+    - name: Create tag and close milestone
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{ secrets.ACCESS_TOKEN }}
+        script: |
+          await github.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: process.env.NEW_TAG,
+            sha: context.sha
+          });
+          const awaitResults = await github.issues.listMilestones({owner: context.repo.owner, repo: context.repo.repo});
+          const milestone = awaitResults.data.find((milestone)=> `refs/tags/${milestone.title}` === process.env.NEW_TAG);
+          await github.issues.updateMilestone({
+            owner: context.repo.owner, repo: context.repo.repo,
+            milestone_number: milestone.number,
+            state: 'closed',
+          });
+  generate-changelog:
+    name: Generate CHANGELOG
+    needs: createTag-milestoneClose
+    runs-on: ubuntu-latest
+    steps:
+#       - name: Get latest published release tag
+#         id: get_latest_release
+#         uses: pozetroninc/github-action-get-latest-release@v0.5.0
+#         with:
+#           repository: ${{ github.repository }}
+#           excludes: draft
       - name: Generate changelog since last published release
         uses: charmixer/auto-changelog-action@v1
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
-          future_release: ${{ github.ref }}
-          since_tag: ${{ steps.get_latest_release.outputs.release }}
+          future_release: $NEW_TAG
+#           since_tag: ${{ steps.get_latest_release.outputs.release }}
       - name: Upload changelog
         uses: actions/upload-artifact@v2
         with:
@@ -54,8 +77,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: PnB ${{ github.ref }}
+        tag_name: $NEW_TAG
+        release_name: PnB ${{ env.NEW_TAG }}
         body_path: CHANGELOG.md
         draft: true
         prerelease: false

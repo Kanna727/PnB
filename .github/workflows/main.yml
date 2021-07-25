@@ -52,7 +52,7 @@ jobs:
         uses: charmixer/auto-changelog-action@v1
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
-          future_release: $NEW_TAG
+          future_release: ${{ env.NEW_TAG }}
           since_tag: ${{ steps.get_latest_release.outputs.release }}
       - name: Upload changelog
         uses: actions/upload-artifact@v2
@@ -77,7 +77,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: $NEW_TAG
+        tag_name: ${{ env.NEW_TAG }}
         release_name: PnB ${{ env.NEW_TAG }}
         body_path: CHANGELOG.md
         draft: true

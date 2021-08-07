@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:portfolio_n_budget/api/gsheets.dart';
 import 'package:portfolio_n_budget/constants.dart';
 import 'package:portfolio_n_budget/utils/credentials_secure_storage.dart';
+import 'package:portfolio_n_budget/api/localAuth.dart';
 
 import 'pages/balances/overview.dart';
 
@@ -59,9 +61,12 @@ class _MyHomePageState extends State<MyHomePage> {
         awaitingCredentials = true;
       });
     } else {
-      setState(() {
-        checkingCredentials = false;
-      });
+      final isAuthenticated = await LocalAuthApi.authenticate();
+      if(isAuthenticated) {
+        setState(() {
+          checkingCredentials = false;
+        });
+      }
     }
   }
 

@@ -11,17 +11,17 @@ const defaultRowsCount = 1000;
 const defaultColumnCount = 26;
 const gsheetsCellsLimit = 5000000;
 
-final int _char_a = 'A'.codeUnitAt(0);
+final int charA = 'A'.codeUnitAt(0);
 
 String getColumnLetter(int index) {
   checkIndex('index', index);
   var number = index - 1;
   final remainder = number % 26;
-  var label = String.fromCharCode(_char_a + remainder);
+  var label = String.fromCharCode(charA + remainder);
   number = number ~/ 26;
   while (number > 0) {
     var remainder = number % 26 - 1;
-    label = '${String.fromCharCode(_char_a + remainder)}$label';
+    label = '${String.fromCharCode(charA + remainder)}$label';
     number = number ~/ 26;
   }
   return label;

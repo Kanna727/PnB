@@ -1,7 +1,5 @@
 import 'package:intl/intl.dart';
 
-const _sheetsEndpoint = 'https://sheets.googleapis.com/v4/spreadsheets/';
-
 const CREDENTIALS_KEY = '_ck';
 const SHEET_ID_KEY = '_sid';
 

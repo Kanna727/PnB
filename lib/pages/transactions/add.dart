@@ -1,6 +1,5 @@
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:portfolio_n_budget/api/gsheets.dart';
 
@@ -44,7 +43,6 @@ class AddTransaction extends StatefulWidget {
 class _AddTransactionState extends State<AddTransaction> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _getData();
   }
@@ -187,7 +185,6 @@ class _AddTransactionState extends State<AddTransaction> {
               height: 5,
               width: 30,
               decoration: BoxDecoration(
-                // color: ThemeData.dark().backgroundColor,
                 color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(30)),
               ),
@@ -214,7 +211,6 @@ class _AddTransactionState extends State<AddTransaction> {
                 : Form(
                     key: _formKey,
                     child: ListView(
-                      // mainAxisAlignment: MainAxisAlignment.center,
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       children: <Widget>[

@@ -145,12 +145,13 @@ jobs:
     # Checkout code, recreate missing files, and get packages.
     - name: Checkout code
       uses: actions/checkout@v2
-    - uses: olegtarasov/get-tag@v2.1
+    - uses: actions-ecosystem/action-regex-match@v2
       id: tagName
       with:
-        tagRegex: "v(.*)"
+        text: ${{ env.NEW_TAG }}
+        regex: "v(.*)"
     - name: Update version in YAML
-      run: sed -i 's/99.99.99+99/${{ steps.tagName.outputs.tag }}/g' pubspec.yaml
+      run: sed -i 's/99.99.99+99/${{ steps.tagName.outputs.group1 }}/g' pubspec.yaml
     - run: flutter pub get
 
     - name: Configure Keystore for Android

@@ -1,7 +1,5 @@
 import 'package:intl/intl.dart';
 
-const _sheetsEndpoint = 'https://sheets.googleapis.com/v4/spreadsheets/';
-
 const CREDENTIALS_KEY = '_ck';
 const SHEET_ID_KEY = '_sid';
 
@@ -56,7 +54,7 @@ enum Positions {
   bottom,
 }
 
-const double EXPANDED_APP_BAR_HEIGHT = 230;
+const double EXPANDED_APP_BAR_HEIGHT = 240;
 
 class BALANCES_TABLE {
   static const fromRow = 3;
@@ -82,7 +80,7 @@ class DEBTS_TABLE {
   static const fromRow = 2;
 }
 
-const ASSET_MANAGEMENT_SHEET_START_ROW = 3;
+const ASSET_MANAGEMENT_SHEET_START_ROW = 2;
 
 class UI_TEXTS {
   static const ADD_TRANSACTION = "Add Transaction";

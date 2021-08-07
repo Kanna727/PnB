@@ -5,6 +5,8 @@ name: CI Test
 # Controls when the workflow will run
 on:
   pull_request:
+    branches:
+      - main
     types: [closed]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -16,6 +18,7 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   createTag-milestoneClose:
+    if: github.event.pull_request.merged == true
     name: Creates Tag & Closes Milestone
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +41,7 @@ jobs:
             state: 'closed',
           });
   generate-changelog:
+    if: github.event.pull_request.merged == true
     name: Generate CHANGELOG
     needs: createTag-milestoneClose
     runs-on: ubuntu-latest
@@ -61,6 +65,7 @@ jobs:
           path: CHANGELOG.md
 
   draft-release:
+    if: github.event.pull_request.merged == true
     name: Draft Github release
     needs: generate-changelog
     runs-on: ubuntu-20.04
@@ -84,6 +89,7 @@ jobs:
         prerelease: false
 
   create-build:
+    if: github.event.pull_request.merged == true
     name: Create ${{ matrix.target }} build
     runs-on: ${{ matrix.os }}
     strategy:
@@ -145,12 +151,13 @@ jobs:
     # Checkout code, recreate missing files, and get packages.
     - name: Checkout code
       uses: actions/checkout@v2
-    - uses: olegtarasov/get-tag@v2.1
+    - uses: actions-ecosystem/action-regex-match@v2
       id: tagName
       with:
-        tagRegex: "v(.*)"
+        text: ${{ env.NEW_TAG }}
+        regex: "v(.*)"
     - name: Update version in YAML
-      run: sed -i 's/99.99.99+99/${{ steps.tagName.outputs.tag }}/g' pubspec.yaml
+      run: sed -i 's/99.99.99+99/${{ steps.tagName.outputs.group1 }}/g' pubspec.yaml
     - run: flutter pub get
 
     - name: Configure Keystore for Android

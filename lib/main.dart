@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'package:portfolio_n_budget/api/gsheets.dart';
 import 'package:portfolio_n_budget/constants.dart';
 import 'package:portfolio_n_budget/utils/credentials_secure_storage.dart';
+import 'package:portfolio_n_budget/api/localAuth.dart';
 
-import 'pages/transactions/add.dart';
 import 'pages/balances/overview.dart';
-import 'widgets/frostedBottomNavBar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +15,6 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     // to hide the status bar
@@ -39,14 +37,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool checkingCredentials = true;
   bool awaitingCredentials = false;
-  int _selectedIndex = 0;
   var _pageController = PageController();
   TextEditingController _sheetIDController = TextEditingController();
   TextEditingController _credentialsController = TextEditingController();
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _getCredentials();
   }
@@ -65,27 +61,14 @@ class _MyHomePageState extends State<MyHomePage> {
         awaitingCredentials = true;
       });
     } else {
-      setState(() {
-        checkingCredentials = false;
-      });
+      final isAuthenticated = await LocalAuthApi.authenticate();
+      if(isAuthenticated) {
+        setState(() {
+          checkingCredentials = false;
+        });
+      }
     }
   }
-
-  static const List<Widget> _widgetOptions = <Widget>[
-    BalancesOverview(),
-    Padding(
-      padding: EdgeInsets.only(bottom: 65),
-      child: AddTransaction(),
-    ),
-  ];
-
-  // void _onItemTapped(int index) {
-  //   setState(() {
-  //     _selectedIndex = index;
-  //     _pageController.animateToPage(_selectedIndex,
-  //         duration: Duration(milliseconds: 200), curve: Curves.linear);
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -132,34 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ],
                       ),
               )
-            : Stack(
-                children: <Widget>[
-                  _widgetOptions.elementAt(_selectedIndex),
-                  // PageView(
-                  //   //scrollDirection: Axis.vertical,
-                  //   children: _widgetOptions,
-                  //   onPageChanged: (index) {
-                  //     setState(() {
-                  //       _selectedIndex = index;
-                  //     });
-                  //   },
-                  //   controller: _pageController,
-                  // ),
-                  // FrostedBottomNavBar(
-                  //     bottomNavigationBarItems: const <BottomNavigationBarItem>[
-                  //       BottomNavigationBarItem(
-                  //           icon: Icon(Icons.account_balance), label: 'Balances'),
-                  //       BottomNavigationBarItem(
-                  //         icon: Icon(Icons.receipt),
-                  //         label: 'Trasanctions',
-                  //       ),
-                  //     ],
-                  //     currentIndex: _selectedIndex,
-                  //     onIndexChange: (val) {
-                  //       _onItemTapped(val);
-                  //     }),
-                ],
-              ),
+            : BalancesOverview(),
         floatingActionButton: Visibility(
             visible: awaitingCredentials,
             child: FloatingActionButton(
@@ -193,8 +149,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              // Retrieve the text the that user has entered by using the
-                              // TextEditingController.
                               content: Text("Incorrect credentials"),
                             );
                           },

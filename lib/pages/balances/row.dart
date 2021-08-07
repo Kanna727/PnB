@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'package:portfolio_n_budget/constants.dart';
 
 class BalanceRow extends StatelessWidget {
   BalanceRow(this.row);
   var row;
-  var mabShortFall;
 
   @override
   Widget build(BuildContext context) {

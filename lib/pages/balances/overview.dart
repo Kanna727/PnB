@@ -2,15 +2,15 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:portfolio_n_budget/api/gsheets.dart';
 import 'package:portfolio_n_budget/constants.dart';
 import 'package:portfolio_n_budget/utils/credentials_secure_storage.dart';
-import 'package:portfolio_n_budget/widgets/forstedAppBar.dart';
 
 import 'row.dart';
 import 'package:portfolio_n_budget/pages/transactions/add.dart';
+import 'package:portfolio_n_budget/widgets/forstedAppBar.dart';
+import 'package:portfolio_n_budget/widgets/spinningIconButton.dart';
 
 bool isLoading = true;
 var rows = [];
@@ -26,18 +26,18 @@ class BalancesOverview extends StatefulWidget {
 }
 
 class _BalancesOverviewState extends State<BalancesOverview>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController controller;
-  static final _sizeTween =
-      new Tween<double>(begin: 0.0, end: EXPANDED_APP_BAR_HEIGHT);
+  late AnimationController rotateController;
   double appBarHeight = 65;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     controller = new AnimationController(
         duration: new Duration(milliseconds: 2500), vsync: this);
+    rotateController =
+        new AnimationController(vsync: this, duration: Duration(seconds: 1));
     _getData();
   }
 
@@ -49,6 +49,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
   }
 
   Future<void> _getData() async {
+    rotateController.repeat();
     var credentials = await CredentialsSecureStorage.getCredentials();
     var sheetID = await CredentialsSecureStorage.getSheetID();
 
@@ -75,16 +76,10 @@ class _BalancesOverviewState extends State<BalancesOverview>
       rows = fetchedRows;
       totals = totalsCols;
     });
+    rotateController.forward(from: rotateController.value);
   }
 
   bool expanded = false;
-
-  _animateAppBar() {
-    setState(() {
-      expanded ? controller.reverse() : controller.forward();
-      expanded = !expanded;
-    });
-  }
 
   static double _minHeight = kToolbarHeight,
       _maxHeight = 1000,
@@ -151,7 +146,6 @@ class _BalancesOverviewState extends State<BalancesOverview>
               height: _offset.dy,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                // color: ThemeData.dark().backgroundColor,
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(30),
@@ -194,7 +188,6 @@ class _BalancesOverviewState extends State<BalancesOverview>
                 height: _appBarOffset.dy,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  // color: ThemeData.dark().backgroundColor,
                   color: Colors.transparent,
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(30),
@@ -204,47 +197,19 @@ class _BalancesOverviewState extends State<BalancesOverview>
                 child: FrostedAppBar(
                   lines: totals,
                   height: _appBarOffset.dy,
+                  actions: [
+                    SpinningIconButton(
+                      controller: rotateController,
+                      iconData: Icons.sync,
+                      onPressed: _getData
+                    )
+                  ],
                 ),
               ),
             ),
           ),
-          // Positioned(
-          //   bottom: 2 * _minHeight -
-          //       _offset.dy -
-          //       28, // 56 is the height of FAB so we use here half of it.
-          //   child: FloatingActionButton(
-          //     child: Icon(_isOpen ? Icons.keyboard_arrow_down : Icons.add),
-          //     onPressed: _handleClick,
-          //   ),
-          // ),
         ],
       ),
     );
-  }
-
-  // first it opens the sheet and when called again it closes.
-  void _handleClick() {
-    _isOpen = !_isOpen;
-    Timer.periodic(Duration(milliseconds: 5), (timer) {
-      if (_isOpen) {
-        double value = _offset.dy +
-            10; // we increment the height of the Container by 10 every 5ms
-        _offset = Offset(0, value);
-        if (_offset.dy > _maxHeight) {
-          _offset =
-              Offset(0, _maxHeight); // makes sure it does't go above maxHeight
-          timer.cancel();
-        }
-      } else {
-        double value = _offset.dy - 10; // we decrement the height by 10 here
-        _offset = Offset(0, value);
-        if (_offset.dy < _minHeight) {
-          _offset = Offset(
-              0, _minHeight); // makes sure it doesn't go beyond minHeight
-          timer.cancel();
-        }
-      }
-      setState(() {});
-    });
   }
 }

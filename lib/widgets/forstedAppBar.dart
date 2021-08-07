@@ -35,7 +35,6 @@ class _FrostedAppBarState extends State<FrostedAppBar> {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(
-          // will be 10 by default if not provided
           sigmaX: widget.blurStrengthX ?? 10,
           sigmaY: widget.blurStrengthY ?? 10,
         ),

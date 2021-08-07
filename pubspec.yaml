@@ -33,6 +33,7 @@ dependencies:
   currency_text_input_formatter: ^2.0.1
   blur_bottom_bar: ^1.0.3
   flutter_secure_storage: ^4.2.0
+  local_auth: ^1.1.6
 
 dev_dependencies:
   flutter_test:

@@ -80,7 +80,7 @@ class DEBTS_TABLE {
   static const fromRow = 2;
 }
 
-const ASSET_MANAGEMENT_SHEET_START_ROW = 3;
+const ASSET_MANAGEMENT_SHEET_START_ROW = 2;
 
 class UI_TEXTS {
   static const ADD_TRANSACTION = "Add Transaction";

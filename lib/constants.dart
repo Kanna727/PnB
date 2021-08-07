@@ -54,7 +54,7 @@ enum Positions {
   bottom,
 }
 
-const double EXPANDED_APP_BAR_HEIGHT = 230;
+const double EXPANDED_APP_BAR_HEIGHT = 240;
 
 class BALANCES_TABLE {
   static const fromRow = 3;

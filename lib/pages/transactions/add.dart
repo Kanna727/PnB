@@ -174,9 +174,7 @@ class _AddTransactionState extends State<AddTransaction> {
             debitAccount == null) ||
         (!(type == TYPES_CLASS.EXPENSE || type == TYPES_CLASS.LIABILITY) &&
             creditAccount == null) ||
-        _amountController.text.isEmpty ||
-        (!(type == TYPES_CLASS.LIABILITY || type == TYPES_CLASS.SAVINGS) &&
-            _noteController.text.isEmpty);
+        _amountController.text.isEmpty;
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -347,14 +345,6 @@ class _AddTransactionState extends State<AddTransaction> {
                                 labelText: UI_TEXTS.NOTE,
                               ),
                               onChanged: onNoteChange,
-                              validator: (value) {
-                                if (type == TYPES_CLASS.LIABILITY ||
-                                    type == TYPES_CLASS.SAVINGS) return null;
-                                if (value == null || value.isEmpty) {
-                                  return UI_TEXTS.NOTE_ERROR;
-                                }
-                                return null;
-                              },
                               onFieldSubmitted: (_) =>
                                   FocusScope.of(context).unfocus(),
                             ),

@@ -10,6 +10,7 @@ import 'package:portfolio_n_budget/utils/credentials_secure_storage.dart';
 import 'row.dart';
 import 'package:portfolio_n_budget/pages/transactions/add.dart';
 import 'package:portfolio_n_budget/widgets/forstedAppBar.dart';
+import 'package:portfolio_n_budget/widgets/spinningIconButton.dart';
 
 bool isLoading = true;
 var rows = [];
@@ -25,8 +26,9 @@ class BalancesOverview extends StatefulWidget {
 }
 
 class _BalancesOverviewState extends State<BalancesOverview>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController controller;
+  late AnimationController rotateController;
   double appBarHeight = 65;
 
   @override
@@ -34,6 +36,8 @@ class _BalancesOverviewState extends State<BalancesOverview>
     super.initState();
     controller = new AnimationController(
         duration: new Duration(milliseconds: 2500), vsync: this);
+    rotateController =
+        new AnimationController(vsync: this, duration: Duration(seconds: 1));
     _getData();
   }
 
@@ -45,6 +49,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
   }
 
   Future<void> _getData() async {
+    rotateController.repeat();
     var credentials = await CredentialsSecureStorage.getCredentials();
     var sheetID = await CredentialsSecureStorage.getSheetID();
 
@@ -71,6 +76,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
       rows = fetchedRows;
       totals = totalsCols;
     });
+    rotateController.forward(from: rotateController.value);
   }
 
   bool expanded = false;
@@ -191,6 +197,13 @@ class _BalancesOverviewState extends State<BalancesOverview>
                 child: FrostedAppBar(
                   lines: totals,
                   height: _appBarOffset.dy,
+                  actions: [
+                    SpinningIconButton(
+                      controller: rotateController,
+                      iconData: Icons.sync,
+                      onPressed: _getData
+                    )
+                  ],
                 ),
               ),
             ),

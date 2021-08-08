@@ -32,9 +32,12 @@ TextEditingController _amountController = TextEditingController();
 TextEditingController _noteController = TextEditingController();
 
 class AddTransaction extends StatefulWidget {
-  const AddTransaction({Key? key, this.showFAB = false}) : super(key: key);
+  const AddTransaction(
+      {Key? key, this.showFAB = false, this.postAddTrasnactionCallback})
+      : super(key: key);
 
   final showFAB;
+  final postAddTrasnactionCallback;
 
   @override
   _AddTransactionState createState() => _AddTransactionState();
@@ -210,7 +213,6 @@ class _AddTransactionState extends State<AddTransaction> {
                     key: _formKey,
                     child: ListView(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
                       children: <Widget>[
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -494,6 +496,8 @@ class _AddTransactionState extends State<AddTransaction> {
       setState(() {
         isSaving = false;
       });
+
+      if (widget.postAddTrasnactionCallback != null) widget.postAddTrasnactionCallback();
     }
   }
 }

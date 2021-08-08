@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:portfolio_n_budget/constants.dart';
+import 'package:portfolio_n_budget/widgets/searchWidget.dart';
 
 class FrostedAppBar extends StatefulWidget {
   //
@@ -13,6 +14,10 @@ class FrostedAppBar extends StatefulWidget {
   Color? color;
   double? blurStrengthX;
   double? blurStrengthY;
+  bool showSearchBar = false;
+  String searchQuery;
+  var onSearch;
+  var searchBarFocusNode;
   //constructor
   FrostedAppBar({
     this.height,
@@ -22,6 +27,10 @@ class FrostedAppBar extends StatefulWidget {
     this.blurStrengthY,
     this.color,
     this.leading,
+    required this.showSearchBar,
+    required this.searchQuery,
+    required this.onSearch,
+    required this.searchBarFocusNode,
   });
   //
   @override
@@ -43,12 +52,12 @@ class _FrostedAppBarState extends State<FrostedAppBar> {
           width: scrSize.width,
           height: widget.height ?? 65,
           child: Padding(
-            padding: new EdgeInsets.symmetric(vertical: 5),
+            padding: new EdgeInsets.symmetric(vertical: 2),
             child: ListView(
               physics: NeverScrollableScrollPhysics(),
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(3.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -66,7 +75,7 @@ class _FrostedAppBarState extends State<FrostedAppBar> {
                                 : widget.lines[0][0] +
                                     " : " +
                                     getCurrencyFormat(widget.lines[0][1]),
-                            style: TextStyle(fontSize: 20),
+                            style: TextStyle(fontSize: 19),
                           ),
                         ),
                       ),
@@ -79,6 +88,15 @@ class _FrostedAppBarState extends State<FrostedAppBar> {
                             ],
                       ),
                     ],
+                  ),
+                ),
+                Visibility(
+                  visible: widget.showSearchBar,
+                  child: SearchWidget(
+                    text: widget.searchQuery,
+                    hintText: 'Search',
+                    onChanged: widget.onSearch,
+                    focusNode: widget.searchBarFocusNode,
                   ),
                 ),
                 ...widget.lines

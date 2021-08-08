@@ -9,7 +9,7 @@ class BalanceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var logoName = row[4].toString().contains("Loan") ? "Loan" : row[0];
-    final planetThumbnail = new Container(
+    final accountThumbnail = new Container(
       margin: new EdgeInsets.symmetric(vertical: 16.0),
       alignment: FractionalOffset.centerLeft,
       child: new Image(
@@ -28,7 +28,7 @@ class BalanceRow extends StatelessWidget {
     final headerTextStyle = baseTextStyle.copyWith(
         color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.w600);
 
-    Widget _planetValue({required String value}) {
+    Widget _accountValue({required String value}) {
       return new Text(
           value != ""
               ? "${UI_TEXTS.MAB_SHORTFALL}: ${getCurrencyFormat(value)}"
@@ -36,7 +36,7 @@ class BalanceRow extends StatelessWidget {
           style: regularTextStyle);
     }
 
-    final planetCardContent = new Container(
+    final accountCardContent = new Container(
       margin: new EdgeInsets.fromLTRB(76.0, 16.0, 16.0, 16.0),
       constraints: new BoxConstraints.expand(),
       child: new Column(
@@ -55,7 +55,7 @@ class BalanceRow extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               new Text(row[4], style: regularTextStyle),
-              _planetValue(
+              _accountValue(
                 value: row[6],
               )
             ],
@@ -64,8 +64,8 @@ class BalanceRow extends StatelessWidget {
       ),
     );
 
-    final planetCard = new Container(
-      child: planetCardContent,
+    final accountCard = new Container(
+      child: accountCardContent,
       height: 124.0,
       margin: new EdgeInsets.only(left: 46.0),
       decoration: new BoxDecoration(
@@ -85,13 +85,13 @@ class BalanceRow extends StatelessWidget {
     return new Container(
         height: 120.0,
         margin: const EdgeInsets.symmetric(
-          vertical: 16.0,
-          horizontal: 24.0,
+          vertical: ACCOUNT_CARDS_VERTICAL_MARGIN,
+          horizontal: ACCOUNT_CARDS_HORIZONTAL_MARGIN,
         ),
         child: new Stack(
           children: <Widget>[
-            planetCard,
-            planetThumbnail,
+            accountCard,
+            accountThumbnail,
           ],
         ));
   }

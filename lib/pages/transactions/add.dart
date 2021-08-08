@@ -213,7 +213,6 @@ class _AddTransactionState extends State<AddTransaction> {
                     key: _formKey,
                     child: ListView(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
                       children: <Widget>[
                         Padding(
                           padding: const EdgeInsets.all(8.0),

@@ -136,6 +136,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
                       : RefreshIndicator(
                           child: ListView.builder(
                               controller: _scrollController,
+                              itemCount: rows.length,
                               itemBuilder: (context, index) =>
                                   (rows[index][0] == rows.first[0])
                                       ? Padding(

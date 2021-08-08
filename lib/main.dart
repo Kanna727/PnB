@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // to hide the status bar
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    // SystemChrome.setEnabledSystemUIOverlays([]);
     return MaterialApp(
       title: 'Portfolio & Budget',
       theme: ThemeData.dark(),

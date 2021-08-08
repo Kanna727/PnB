@@ -54,7 +54,7 @@ enum Positions {
   bottom,
 }
 
-const double EXPANDED_APP_BAR_HEIGHT = 260;
+const double EXPANDED_APP_BAR_HEIGHT = 310;
 const double SEARCH_WIDGET_HEIGHT = 42;
 const double ACCOUNT_CARDS_VERTICAL_MARGIN = 16;
 const double ACCOUNT_CARDS_HORIZONTAL_MARGIN = 24;

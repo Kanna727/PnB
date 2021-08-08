@@ -109,14 +109,8 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   Future<void> onRefresh() async {
-    setState(() {
-      isRefreshing = true;
-    });
     await _getData();
     if (type != null) await _getItems(type);
-    setState(() {
-      isRefreshing = false;
-    });
   }
 
   void onTypeChange(String? newValue) {
@@ -178,248 +172,529 @@ class _AddTransactionState extends State<AddTransaction> {
         (!(type == TYPES_CLASS.EXPENSE || type == TYPES_CLASS.LIABILITY) &&
             creditAccount == null) ||
         _amountController.text.isEmpty;
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          children: [
-            Container(
-              height: 5,
-              width: 30,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(30)),
+    return Column(
+      // padding: EdgeInsets.zero,
+      // physics: NeverScrollableScrollPhysics(),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(7.0),
+          child: Column(
+            children: [
+              Container(
+                height: 5,
+                width: 30,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(UI_TEXTS.ADD_TRANSACTION),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  UI_TEXTS.ADD_TRANSACTION,
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ],
+          ),
         ),
-        centerTitle: true,
-        actions: [
-          Visibility(
-              visible: widget.showFAB && !isLoading && !isRefreshing,
-              child:
-                  IconButton(onPressed: onRefresh, icon: Icon(Icons.refresh)))
-        ],
-      ),
-      body: Center(
-        child: isLoading
+        isLoading
             ? Container()
             : isRefreshing
-                ? CircularProgressIndicator()
-                : Form(
-                    key: _formKey,
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Dropdown(
-                            dropdownValue: type,
-                            onChange: onTypeChange,
-                            list: isSaving ? null : TYPES,
-                            title: UI_TEXTS.TYPE,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return UI_TEXTS.TYPE_ERROR;
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        Visibility(
-                          visible: !(type == TYPES_CLASS.SELF_TRANSFER ||
-                              type == TYPES_CLASS.REWARD_POINTS),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Dropdown(
-                              dropdownValue: item,
-                              onChange: onItemChange,
-                              list: isSaving || !itemsFetched ? null : items,
-                              title: UI_TEXTS.ITEM,
-                              validator: (value) {
-                                if (type == TYPES_CLASS.SELF_TRANSFER)
-                                  return null;
-                                if (value == null || value.isEmpty) {
-                                  return UI_TEXTS.ITEM_ERROR;
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ),
-                        Visibility(
-                          visible: !(type == TYPES_CLASS.INCOME ||
-                              type == TYPES_CLASS.REWARD_POINTS),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Dropdown(
-                              dropdownValue: debitAccount,
-                              onChange: onDebitAccountChange,
-                              list: isSaving ? null : names,
-                              title: UI_TEXTS.DEBIT_ACCOUNT,
-                              validator: (value) {
-                                if (type == TYPES_CLASS.INCOME) return null;
-                                if (value == null || value.isEmpty) {
-                                  return UI_TEXTS.DEBIT_ACCOUNT_ERROR;
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ),
-                        Visibility(
-                          visible: type == TYPES_CLASS.INCOME ||
-                              type == TYPES_CLASS.SAVINGS ||
-                              type == TYPES_CLASS.SELF_TRANSFER ||
-                              type == TYPES_CLASS.REWARD_POINTS,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Dropdown(
-                              dropdownValue: creditAccount,
-                              onChange: onCreditAccountChange,
-                              list: isSaving ? null : names,
-                              title: UI_TEXTS.CREDIT_ACCOUNT,
-                              validator: (value) {
-                                if (type == TYPES_CLASS.EXPENSE ||
-                                    type == TYPES_CLASS.LIABILITY) return null;
-                                if (value == null || value.isEmpty) {
-                                  return UI_TEXTS.CREDIT_ACCOUNT_ERROR;
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: DateTimePicker(
-                            date: date,
-                            onChange: onDateChange,
-                            title: UI_TEXTS.DATE,
-                            disabled: isSaving,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            enabled: !isSaving,
-                            inputFormatters: type == TYPES_CLASS.REWARD_POINTS
-                                ? null
-                                : [
-                                    CurrencyTextInputFormatter(
-                                        locale: LOCALE,
-                                        symbol: CURRENCY_SYMBOL_WITH_SPACE)
-                                  ],
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: type == TYPES_CLASS.REWARD_POINTS
-                                  ? UI_TEXTS.POINTS
-                                  : UI_TEXTS.AMOUNT,
-                            ),
-                            onChanged: onAmountChange,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return type == TYPES_CLASS.REWARD_POINTS
-                                    ? UI_TEXTS.POINTS_ERROR
-                                    : UI_TEXTS.AMOUNT_ERROR;
-                              }
-                              return null;
-                            },
-                            onEditingComplete: () =>
-                                FocusScope.of(context).nextFocus(),
-                            textInputAction: TextInputAction.next,
-                          ),
-                        ),
-                        Visibility(
-                          visible: !(type == TYPES_CLASS.LIABILITY ||
-                              type == TYPES_CLASS.SAVINGS),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              enabled: !isSaving,
-                              keyboardType: TextInputType.text,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: UI_TEXTS.NOTE,
+                ? Center(child: CircularProgressIndicator())
+                : Flexible(
+                    child: Stack(
+                      children: [
+                        Form(
+                            key: _formKey,
+                            child: RefreshIndicator(
+                              onRefresh: onRefresh,
+                              child: ListView(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Dropdown(
+                                      dropdownValue: type,
+                                      onChange: onTypeChange,
+                                      list: isSaving ? null : TYPES,
+                                      title: UI_TEXTS.TYPE,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return UI_TEXTS.TYPE_ERROR;
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  Visibility(
+                                    visible:
+                                        !(type == TYPES_CLASS.SELF_TRANSFER ||
+                                            type == TYPES_CLASS.REWARD_POINTS),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Dropdown(
+                                        dropdownValue: item,
+                                        onChange: onItemChange,
+                                        list: isSaving || !itemsFetched
+                                            ? null
+                                            : items,
+                                        title: UI_TEXTS.ITEM,
+                                        validator: (value) {
+                                          if (type == TYPES_CLASS.SELF_TRANSFER)
+                                            return null;
+                                          if (value == null || value.isEmpty) {
+                                            return UI_TEXTS.ITEM_ERROR;
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  Visibility(
+                                    visible: !(type == TYPES_CLASS.INCOME ||
+                                        type == TYPES_CLASS.REWARD_POINTS),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Dropdown(
+                                        dropdownValue: debitAccount,
+                                        onChange: onDebitAccountChange,
+                                        list: isSaving ? null : names,
+                                        title: UI_TEXTS.DEBIT_ACCOUNT,
+                                        validator: (value) {
+                                          if (type == TYPES_CLASS.INCOME)
+                                            return null;
+                                          if (value == null || value.isEmpty) {
+                                            return UI_TEXTS.DEBIT_ACCOUNT_ERROR;
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  Visibility(
+                                    visible: type == TYPES_CLASS.INCOME ||
+                                        type == TYPES_CLASS.SAVINGS ||
+                                        type == TYPES_CLASS.SELF_TRANSFER ||
+                                        type == TYPES_CLASS.REWARD_POINTS,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Dropdown(
+                                        dropdownValue: creditAccount,
+                                        onChange: onCreditAccountChange,
+                                        list: isSaving ? null : names,
+                                        title: UI_TEXTS.CREDIT_ACCOUNT,
+                                        validator: (value) {
+                                          if (type == TYPES_CLASS.EXPENSE ||
+                                              type == TYPES_CLASS.LIABILITY)
+                                            return null;
+                                          if (value == null || value.isEmpty) {
+                                            return UI_TEXTS
+                                                .CREDIT_ACCOUNT_ERROR;
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: DateTimePicker(
+                                      date: date,
+                                      onChange: onDateChange,
+                                      title: UI_TEXTS.DATE,
+                                      disabled: isSaving,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: TextFormField(
+                                      enabled: !isSaving,
+                                      inputFormatters:
+                                          type == TYPES_CLASS.REWARD_POINTS
+                                              ? null
+                                              : [
+                                                  CurrencyTextInputFormatter(
+                                                      locale: LOCALE,
+                                                      symbol:
+                                                          CURRENCY_SYMBOL_WITH_SPACE)
+                                                ],
+                                      keyboardType: TextInputType.number,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        labelText:
+                                            type == TYPES_CLASS.REWARD_POINTS
+                                                ? UI_TEXTS.POINTS
+                                                : UI_TEXTS.AMOUNT,
+                                      ),
+                                      onChanged: onAmountChange,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return type ==
+                                                  TYPES_CLASS.REWARD_POINTS
+                                              ? UI_TEXTS.POINTS_ERROR
+                                              : UI_TEXTS.AMOUNT_ERROR;
+                                        }
+                                        return null;
+                                      },
+                                      onEditingComplete: () =>
+                                          FocusScope.of(context).nextFocus(),
+                                      textInputAction: TextInputAction.next,
+                                    ),
+                                  ),
+                                  Visibility(
+                                    visible: !(type == TYPES_CLASS.LIABILITY ||
+                                        type == TYPES_CLASS.SAVINGS),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: TextFormField(
+                                        enabled: !isSaving,
+                                        keyboardType: TextInputType.text,
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          labelText: UI_TEXTS.NOTE,
+                                        ),
+                                        onChanged: onNoteChange,
+                                        onFieldSubmitted: (_) =>
+                                            FocusScope.of(context).unfocus(),
+                                      ),
+                                    ),
+                                  ),
+                                  Visibility(
+                                      visible: !(type == TYPES_CLASS.INCOME ||
+                                          type == TYPES_CLASS.REWARD_POINTS),
+                                      child: CheckboxListTile(
+                                        title: Text("To be debited"),
+                                        value: toBeDebited,
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            toBeDebited = newValue!;
+                                          });
+                                        },
+                                      )),
+                                  Visibility(
+                                      visible: !(type == TYPES_CLASS.EXPENSE),
+                                      child: CheckboxListTile(
+                                        title: Text("To be credited"),
+                                        value: toBeCredited,
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            toBeCredited = newValue!;
+                                          });
+                                        },
+                                      )),
+                                ],
                               ),
-                              onChanged: onNoteChange,
-                              onFieldSubmitted: (_) =>
-                                  FocusScope.of(context).unfocus(),
-                            ),
-                          ),
-                        ),
-                        Visibility(
-                            visible: !(type == TYPES_CLASS.INCOME ||
-                                type == TYPES_CLASS.REWARD_POINTS),
-                            child: CheckboxListTile(
-                              title: Text("To be debited"),
-                              value: toBeDebited,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  toBeDebited = newValue!;
-                                });
-                              },
                             )),
-                        Visibility(
-                            visible: !(type == TYPES_CLASS.EXPENSE),
-                            child: CheckboxListTile(
-                              title: Text("To be credited"),
-                              value: toBeCredited,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  toBeCredited = newValue!;
-                                });
-                              },
-                            )),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Visibility(
+                              visible: widget.showFAB,
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: FloatingActionButton.extended(
+                                    onPressed: onSave,
+                                    tooltip: UI_TEXTS.ADD_TRANSACTION,
+                                    label: AnimatedSwitcher(
+                                      duration: Duration(seconds: 1),
+                                      transitionBuilder: (Widget child,
+                                              Animation<double> animation) =>
+                                          FadeTransition(
+                                        opacity: animation,
+                                        child: SizeTransition(
+                                          child: child,
+                                          sizeFactor: animation,
+                                          axis: Axis.horizontal,
+                                        ),
+                                      ),
+                                      child: isLoading ||
+                                              isNotFilled ||
+                                              isSaving ||
+                                              isRefreshing
+                                          ? Padding(
+                                              padding:
+                                                  const EdgeInsets.all(2.0),
+                                              child: isSaving
+                                                  ? CircularProgressIndicator(
+                                                      color: ColorScheme.dark()
+                                                          .primary,
+                                                    )
+                                                  : Icon(Icons.save),
+                                            )
+                                          : Row(
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 4.0),
+                                                  child: Icon(Icons.save),
+                                                ),
+                                                Text("Save")
+                                              ],
+                                            ),
+                                    )),
+                              )),
+                        )
                       ],
-                    )),
-      ),
-      floatingActionButton: Visibility(
-        visible: widget.showFAB,
-        child: FloatingActionButton.extended(
-          onPressed: onSave,
-          tooltip: UI_TEXTS.ADD_TRANSACTION,
-          label: AnimatedSwitcher(
-            duration: Duration(seconds: 1),
-            transitionBuilder: (Widget child, Animation<double> animation) =>
-                FadeTransition(
-              opacity: animation,
-              child: SizeTransition(
-                child: child,
-                sizeFactor: animation,
-                axis: Axis.horizontal,
-              ),
-            ),
-            child: isLoading || isNotFilled || isSaving || isRefreshing
-                ? Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: isSaving
-                        ? CircularProgressIndicator(
-                            color: ColorScheme.dark().primary,
-                          )
-                        : Icon(Icons.save),
-                  )
-                : Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 4.0),
-                        child: Icon(Icons.save),
-                      ),
-                      Text("Save")
-                    ],
+                    ),
                   ),
-          ),
-          backgroundColor:
-              isLoading || isNotFilled || isRefreshing ? Colors.grey : null,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      ],
     );
   }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   var isNotFilled = type == null ||
+  //       (!(type == TYPES_CLASS.SAVINGS || type == TYPES_CLASS.REWARD_POINTS) &&
+  //           item == null) ||
+  //       (!(type == TYPES_CLASS.INCOME || type == TYPES_CLASS.REWARD_POINTS) &&
+  //           debitAccount == null) ||
+  //       (!(type == TYPES_CLASS.EXPENSE || type == TYPES_CLASS.LIABILITY) &&
+  //           creditAccount == null) ||
+  //       _amountController.text.isEmpty;
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       title: Column(
+  //         children: [
+  //           Container(
+  //             height: 5,
+  //             width: 30,
+  //             decoration: BoxDecoration(
+  //               color: Colors.white,
+  //               borderRadius: BorderRadius.all(Radius.circular(30)),
+  //             ),
+  //           ),
+  //           Padding(
+  //             padding: const EdgeInsets.all(8.0),
+  //             child: Text(UI_TEXTS.ADD_TRANSACTION),
+  //           ),
+  //         ],
+  //       ),
+  //       centerTitle: true,
+  //       actions: [
+  //         Visibility(
+  //             visible: widget.showFAB && !isLoading && !isRefreshing,
+  //             child:
+  //                 IconButton(onPressed: onRefresh, icon: Icon(Icons.refresh)))
+  //       ],
+  //     ),
+  //     body: Center(
+  //       child: isLoading
+  //           ? Container()
+  //           : isRefreshing
+  //               ? CircularProgressIndicator()
+  //               : Form(
+  //                   key: _formKey,
+  //                   child: ListView(
+  //                     shrinkWrap: true,
+  //                     children: <Widget>[
+  //                       Padding(
+  //                         padding: const EdgeInsets.all(8.0),
+  //                         child: Dropdown(
+  //                           dropdownValue: type,
+  //                           onChange: onTypeChange,
+  //                           list: isSaving ? null : TYPES,
+  //                           title: UI_TEXTS.TYPE,
+  //                           validator: (value) {
+  //                             if (value == null || value.isEmpty) {
+  //                               return UI_TEXTS.TYPE_ERROR;
+  //                             }
+  //                             return null;
+  //                           },
+  //                         ),
+  //                       ),
+  //                       Visibility(
+  //                         visible: !(type == TYPES_CLASS.SELF_TRANSFER ||
+  //                             type == TYPES_CLASS.REWARD_POINTS),
+  //                         child: Padding(
+  //                           padding: const EdgeInsets.all(8.0),
+  //                           child: Dropdown(
+  //                             dropdownValue: item,
+  //                             onChange: onItemChange,
+  //                             list: isSaving || !itemsFetched ? null : items,
+  //                             title: UI_TEXTS.ITEM,
+  //                             validator: (value) {
+  //                               if (type == TYPES_CLASS.SELF_TRANSFER)
+  //                                 return null;
+  //                               if (value == null || value.isEmpty) {
+  //                                 return UI_TEXTS.ITEM_ERROR;
+  //                               }
+  //                               return null;
+  //                             },
+  //                           ),
+  //                         ),
+  //                       ),
+  //                       Visibility(
+  //                         visible: !(type == TYPES_CLASS.INCOME ||
+  //                             type == TYPES_CLASS.REWARD_POINTS),
+  //                         child: Padding(
+  //                           padding: const EdgeInsets.all(8.0),
+  //                           child: Dropdown(
+  //                             dropdownValue: debitAccount,
+  //                             onChange: onDebitAccountChange,
+  //                             list: isSaving ? null : names,
+  //                             title: UI_TEXTS.DEBIT_ACCOUNT,
+  //                             validator: (value) {
+  //                               if (type == TYPES_CLASS.INCOME) return null;
+  //                               if (value == null || value.isEmpty) {
+  //                                 return UI_TEXTS.DEBIT_ACCOUNT_ERROR;
+  //                               }
+  //                               return null;
+  //                             },
+  //                           ),
+  //                         ),
+  //                       ),
+  //                       Visibility(
+  //                         visible: type == TYPES_CLASS.INCOME ||
+  //                             type == TYPES_CLASS.SAVINGS ||
+  //                             type == TYPES_CLASS.SELF_TRANSFER ||
+  //                             type == TYPES_CLASS.REWARD_POINTS,
+  //                         child: Padding(
+  //                           padding: const EdgeInsets.all(8.0),
+  //                           child: Dropdown(
+  //                             dropdownValue: creditAccount,
+  //                             onChange: onCreditAccountChange,
+  //                             list: isSaving ? null : names,
+  //                             title: UI_TEXTS.CREDIT_ACCOUNT,
+  //                             validator: (value) {
+  //                               if (type == TYPES_CLASS.EXPENSE ||
+  //                                   type == TYPES_CLASS.LIABILITY) return null;
+  //                               if (value == null || value.isEmpty) {
+  //                                 return UI_TEXTS.CREDIT_ACCOUNT_ERROR;
+  //                               }
+  //                               return null;
+  //                             },
+  //                           ),
+  //                         ),
+  //                       ),
+  //                       Padding(
+  //                         padding: const EdgeInsets.all(8.0),
+  //                         child: DateTimePicker(
+  //                           date: date,
+  //                           onChange: onDateChange,
+  //                           title: UI_TEXTS.DATE,
+  //                           disabled: isSaving,
+  //                         ),
+  //                       ),
+  //                       Padding(
+  //                         padding: const EdgeInsets.all(8.0),
+  //                         child: TextFormField(
+  //                           enabled: !isSaving,
+  //                           inputFormatters: type == TYPES_CLASS.REWARD_POINTS
+  //                               ? null
+  //                               : [
+  //                                   CurrencyTextInputFormatter(
+  //                                       locale: LOCALE,
+  //                                       symbol: CURRENCY_SYMBOL_WITH_SPACE)
+  //                                 ],
+  //                           keyboardType: TextInputType.number,
+  //                           decoration: InputDecoration(
+  //                             border: OutlineInputBorder(),
+  //                             labelText: type == TYPES_CLASS.REWARD_POINTS
+  //                                 ? UI_TEXTS.POINTS
+  //                                 : UI_TEXTS.AMOUNT,
+  //                           ),
+  //                           onChanged: onAmountChange,
+  //                           validator: (value) {
+  //                             if (value == null || value.isEmpty) {
+  //                               return type == TYPES_CLASS.REWARD_POINTS
+  //                                   ? UI_TEXTS.POINTS_ERROR
+  //                                   : UI_TEXTS.AMOUNT_ERROR;
+  //                             }
+  //                             return null;
+  //                           },
+  //                           onEditingComplete: () =>
+  //                               FocusScope.of(context).nextFocus(),
+  //                           textInputAction: TextInputAction.next,
+  //                         ),
+  //                       ),
+  //                       Visibility(
+  //                         visible: !(type == TYPES_CLASS.LIABILITY ||
+  //                             type == TYPES_CLASS.SAVINGS),
+  //                         child: Padding(
+  //                           padding: const EdgeInsets.all(8.0),
+  //                           child: TextFormField(
+  //                             enabled: !isSaving,
+  //                             keyboardType: TextInputType.text,
+  //                             decoration: InputDecoration(
+  //                               border: OutlineInputBorder(),
+  //                               labelText: UI_TEXTS.NOTE,
+  //                             ),
+  //                             onChanged: onNoteChange,
+  //                             onFieldSubmitted: (_) =>
+  //                                 FocusScope.of(context).unfocus(),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                       Visibility(
+  //                           visible: !(type == TYPES_CLASS.INCOME ||
+  //                               type == TYPES_CLASS.REWARD_POINTS),
+  //                           child: CheckboxListTile(
+  //                             title: Text("To be debited"),
+  //                             value: toBeDebited,
+  //                             onChanged: (newValue) {
+  //                               setState(() {
+  //                                 toBeDebited = newValue!;
+  //                               });
+  //                             },
+  //                           )),
+  //                       Visibility(
+  //                           visible: !(type == TYPES_CLASS.EXPENSE),
+  //                           child: CheckboxListTile(
+  //                             title: Text("To be credited"),
+  //                             value: toBeCredited,
+  //                             onChanged: (newValue) {
+  //                               setState(() {
+  //                                 toBeCredited = newValue!;
+  //                               });
+  //                             },
+  //                           )),
+  //                     ],
+  //                   )),
+  //     ),
+  //     floatingActionButton: Visibility(
+  //       visible: widget.showFAB,
+  //       child: FloatingActionButton.extended(
+  //         onPressed: onSave,
+  //         tooltip: UI_TEXTS.ADD_TRANSACTION,
+  //         label: AnimatedSwitcher(
+  //           duration: Duration(seconds: 1),
+  //           transitionBuilder: (Widget child, Animation<double> animation) =>
+  //               FadeTransition(
+  //             opacity: animation,
+  //             child: SizeTransition(
+  //               child: child,
+  //               sizeFactor: animation,
+  //               axis: Axis.horizontal,
+  //             ),
+  //           ),
+  //           child: isLoading || isNotFilled || isSaving || isRefreshing
+  //               ? Padding(
+  //                   padding: const EdgeInsets.all(2.0),
+  //                   child: isSaving
+  //                       ? CircularProgressIndicator(
+  //                           color: ColorScheme.dark().primary,
+  //                         )
+  //                       : Icon(Icons.save),
+  //                 )
+  //               : Row(
+  //                   children: [
+  //                     Padding(
+  //                       padding: const EdgeInsets.only(right: 4.0),
+  //                       child: Icon(Icons.save),
+  //                     ),
+  //                     Text("Save")
+  //                   ],
+  //                 ),
+  //         ),
+  //         backgroundColor:
+  //             isLoading || isNotFilled || isRefreshing ? Colors.grey : null,
+  //       ),
+  //     ),
+  //     floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+  //   );
+  // }
 
   void onSave() async {
     if (isLoading || isRefreshing) return;
@@ -497,7 +772,8 @@ class _AddTransactionState extends State<AddTransaction> {
         isSaving = false;
       });
 
-      if (widget.postAddTrasnactionCallback != null) widget.postAddTrasnactionCallback();
+      if (widget.postAddTrasnactionCallback != null)
+        widget.postAddTrasnactionCallback();
     }
   }
 }

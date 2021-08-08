@@ -129,10 +129,11 @@ class _BalancesOverviewState extends State<BalancesOverview>
   bool expanded = false;
 
   static double _minHeight = kToolbarHeight,
+      _minAppBarHeight = 2 * kToolbarHeight,
       _maxHeight = 1000,
       _maxAppBarHeight = EXPANDED_APP_BAR_HEIGHT;
   Offset _offset = Offset(0, _minHeight);
-  Offset _appBarOffset = Offset(0, _minHeight);
+  Offset _appBarOffset = Offset(0, _minAppBarHeight);
   Offset _searchOffset = Offset(0, 0);
 
   @override
@@ -140,7 +141,9 @@ class _BalancesOverviewState extends State<BalancesOverview>
     _maxHeight = MediaQuery.of(context).size.height - EXPANDED_APP_BAR_HEIGHT;
     _maxAppBarHeight = _showSearchBar
         ? _minHeight + SEARCH_WIDGET_HEIGHT
-        : query == '' ? EXPANDED_APP_BAR_HEIGHT : _minHeight;
+        : query == ''
+            ? EXPANDED_APP_BAR_HEIGHT
+            : _minHeight;
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -206,21 +209,29 @@ class _BalancesOverviewState extends State<BalancesOverview>
                 }
                 setState(() {});
               },
-              child: AnimatedContainer(
-                duration: const Duration(seconds: 1),
-                curve: Curves.easeOut,
-                height: _offset.dy,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                    sigmaX: 10,
+                    sigmaY: 10,
+                  ),
+                  child: AnimatedContainer(
+                    duration: const Duration(seconds: 1),
+                    curve: Curves.easeOut,
+                    height: _offset.dy,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                      ),
+                    ),
+                    child: AddTransaction(
+                        showFAB: _offset.dy > kToolbarHeight * 3,
+                        postAddTrasnactionCallback: _getData),
                   ),
                 ),
-                child: AddTransaction(
-                    showFAB: _offset.dy > kToolbarHeight * 3,
-                    postAddTrasnactionCallback: _getData),
               ),
             ),
           ),
@@ -229,8 +240,8 @@ class _BalancesOverviewState extends State<BalancesOverview>
             child: GestureDetector(
               onPanUpdate: (details) {
                 _appBarOffset = Offset(0, _appBarOffset.dy + details.delta.dy);
-                if (_appBarOffset.dy < _minHeight) {
-                  _appBarOffset = Offset(0, _minHeight);
+                if (_appBarOffset.dy < _minAppBarHeight) {
+                  _appBarOffset = Offset(0, _minAppBarHeight);
                 } else if (_appBarOffset.dy > _maxAppBarHeight) {
                   _appBarOffset = Offset(0, _maxAppBarHeight);
                 }
@@ -238,13 +249,13 @@ class _BalancesOverviewState extends State<BalancesOverview>
               },
               onPanEnd: (details) {
                 if (_appBarOffset.dy <
-                    (EXPANDED_APP_BAR_HEIGHT - _minHeight) * 0.75) {
-                  _appBarOffset = Offset(0, _minHeight);
+                    (EXPANDED_APP_BAR_HEIGHT - _minAppBarHeight) * 0.75) {
+                  _appBarOffset = Offset(0, _minAppBarHeight);
                   _showSearchBar = false;
                   _searchOffset = Offset(0, 0);
                   _searchController.forward();
                 } else if (_appBarOffset.dy >
-                    (EXPANDED_APP_BAR_HEIGHT - _minHeight) * 0.25) {
+                    (EXPANDED_APP_BAR_HEIGHT - _minAppBarHeight) * 0.25) {
                   _appBarOffset = Offset(0, EXPANDED_APP_BAR_HEIGHT);
                 }
                 setState(() {});
@@ -287,8 +298,8 @@ class _BalancesOverviewState extends State<BalancesOverview>
                                   0,
                                   SEARCH_WIDGET_HEIGHT +
                                       ACCOUNT_CARDS_VERTICAL_MARGIN);
-                              _appBarOffset =
-                                  Offset(0, _minHeight + SEARCH_WIDGET_HEIGHT);
+                              _appBarOffset = Offset(
+                                  0, _minAppBarHeight + SEARCH_WIDGET_HEIGHT);
                             });
                             _searchBoxFocusNode.requestFocus();
                           },

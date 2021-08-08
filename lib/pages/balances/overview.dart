@@ -14,6 +14,7 @@ import 'package:portfolio_n_budget/widgets/forstedAppBar.dart';
 import 'package:portfolio_n_budget/widgets/spinningIconButton.dart';
 
 bool isLoading = true;
+bool isSyncing = true;
 var rows = [];
 var totals = [];
 late Spreadsheet spreadsheet;
@@ -34,6 +35,10 @@ class _BalancesOverviewState extends State<BalancesOverview>
       AnimationController(duration: const Duration(seconds: 1), vsync: this);
   late final Animation<double> _fabAnimation =
       CurvedAnimation(parent: _fabController, curve: Curves.fastOutSlowIn);
+  late final AnimationController _syncController =
+      AnimationController(duration: const Duration(seconds: 1), vsync: this);
+  late final Animation<double> _syncAnimation =
+      CurvedAnimation(parent: _syncController, curve: Curves.fastOutSlowIn);
   final _scrollController = ScrollController();
   double _appBarHeight = 65;
 
@@ -49,6 +54,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
     super.dispose();
     _rotateController.dispose();
     _fabController.dispose();
+    _syncController.dispose();
     _scrollController.dispose();
   }
 
@@ -62,13 +68,19 @@ class _BalancesOverviewState extends State<BalancesOverview>
   void listenScrolling() {
     if (_scrollController.position.atEdge &&
         _scrollController.position.pixels == 0) {
+      isSyncing ? _syncController.forward() : _syncController.reverse();
       _fabController.reverse();
     } else {
+      _syncController.forward();
       _fabController.forward();
     }
   }
 
   Future<void> _getData() async {
+    setState(() {
+      isSyncing = true;
+    });
+    _syncController.forward();
     _rotateController.repeat();
     var credentials = await CredentialsSecureStorage.getCredentials();
     var sheetID = await CredentialsSecureStorage.getSheetID();
@@ -93,10 +105,12 @@ class _BalancesOverviewState extends State<BalancesOverview>
 
     setState(() {
       isLoading = false;
+      isSyncing = false;
       rows = fetchedRows;
       totals = totalsCols;
     });
     _rotateController.forward(from: _rotateController.value);
+    _syncController.reverse();
   }
 
   bool expanded = false;
@@ -151,13 +165,19 @@ class _BalancesOverviewState extends State<BalancesOverview>
               if (_offset.dy < (_maxHeight - _minHeight) * 0.75) {
                 _offset = Offset(0, _minHeight);
                 if (!(_scrollController.position.atEdge &&
-                    _scrollController.position.pixels == 0))
+                    _scrollController.position.pixels == 0)) {
+                  _syncController.forward();
                   _fabController.forward();
+                }
               } else if (_offset.dy > (_maxHeight - _minHeight) * 0.25) {
                 _offset = Offset(0, _maxHeight);
                 if (!(_scrollController.position.atEdge &&
-                    _scrollController.position.pixels == 0))
+                    _scrollController.position.pixels == 0)) {
                   _fabController.reverse();
+                  isSyncing
+                      ? _syncController.forward()
+                      : _syncController.reverse();
+                }
               }
               setState(() {});
             },
@@ -175,6 +195,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
               ),
               child: AddTransaction(
                 showFAB: _offset.dy > kToolbarHeight * 3,
+                postAddTrasnactionCallback: _getData
               ),
             ),
           ),
@@ -220,7 +241,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
                   height: _appBarOffset.dy,
                   actions: [
                     ScaleTransition(
-                      scale: _fabAnimation,
+                      scale: _syncAnimation,
                       child: SpinningIconButton(
                           controller: _rotateController,
                           iconData: Icons.sync,

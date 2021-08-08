@@ -208,7 +208,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
               },
               child: AnimatedContainer(
                 duration: const Duration(seconds: 1),
-                curve: Curves.fastOutSlowIn,
+                curve: Curves.easeOut,
                 height: _offset.dy,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(

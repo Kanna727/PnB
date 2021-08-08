@@ -1,4 +1,4 @@
-package com.example.portfolio_n_budget
+package com.prasanth.portfolio_n_budget
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine

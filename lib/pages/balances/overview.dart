@@ -129,7 +129,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
   bool expanded = false;
 
   static double _minHeight = kToolbarHeight,
-      _minAppBarHeight = 2 * kToolbarHeight,
+      _minAppBarHeight = kToolbarHeight,
       _maxHeight = 1000,
       _maxAppBarHeight = EXPANDED_APP_BAR_HEIGHT;
   Offset _offset = Offset(0, _minHeight);
@@ -139,6 +139,8 @@ class _BalancesOverviewState extends State<BalancesOverview>
   @override
   Widget build(BuildContext context) {
     _maxHeight = MediaQuery.of(context).size.height - EXPANDED_APP_BAR_HEIGHT;
+    _minAppBarHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
+    if(_appBarOffset.dy == kToolbarHeight) _appBarOffset = Offset(0, _minAppBarHeight);
     _maxAppBarHeight = _showSearchBar
         ? _minHeight + SEARCH_WIDGET_HEIGHT
         : query == ''

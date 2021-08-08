@@ -35,11 +35,13 @@ jobs:
           });
           const awaitResults = await github.issues.listMilestones({owner: context.repo.owner, repo: context.repo.repo});
           const milestone = awaitResults.data.find((milestone)=> `refs/tags/${milestone.title}` === process.env.NEW_TAG);
-          await github.issues.updateMilestone({
-            owner: context.repo.owner, repo: context.repo.repo,
-            milestone_number: milestone.number,
-            state: 'closed',
-          });
+          if(milestone) {
+            await github.issues.updateMilestone({
+              owner: context.repo.owner, repo: context.repo.repo,
+              milestone_number: milestone.number,
+              state: 'closed',
+            });
+          }
   generate-changelog:
     if: github.event.pull_request.merged == true
     name: Generate CHANGELOG

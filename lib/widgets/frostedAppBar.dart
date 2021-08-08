@@ -75,7 +75,7 @@ class _FrostedAppBarState extends State<FrostedAppBar> {
                                 : widget.lines[0][0] +
                                     " : " +
                                     getCurrencyFormat(widget.lines[0][1]),
-                            style: TextStyle(fontSize: 19),
+                            style: TextStyle(fontSize: 18),
                           ),
                         ),
                       ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:portfolio_n_budget/api/gsheets.dart';
 import 'package:portfolio_n_budget/constants.dart';
@@ -27,18 +28,28 @@ class BalancesOverview extends StatefulWidget {
 
 class _BalancesOverviewState extends State<BalancesOverview>
     with TickerProviderStateMixin {
-  late AnimationController controller;
-  late AnimationController rotateController;
-  double appBarHeight = 65;
+  late final AnimationController _rotateController =
+      AnimationController(duration: Duration(seconds: 1), vsync: this);
+  late final AnimationController _fabController =
+      AnimationController(duration: const Duration(seconds: 1), vsync: this);
+  late final Animation<double> _fabAnimation =
+      CurvedAnimation(parent: _fabController, curve: Curves.fastOutSlowIn);
+  final _scrollController = ScrollController();
+  double _appBarHeight = 65;
 
   @override
   void initState() {
     super.initState();
-    controller = new AnimationController(
-        duration: new Duration(milliseconds: 2500), vsync: this);
-    rotateController =
-        new AnimationController(vsync: this, duration: Duration(seconds: 1));
+    _scrollController.addListener(listenScrolling);
     _getData();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _rotateController.dispose();
+    _fabController.dispose();
+    _scrollController.dispose();
   }
 
   @override
@@ -48,8 +59,17 @@ class _BalancesOverviewState extends State<BalancesOverview>
     }
   }
 
+  void listenScrolling() {
+    if (_scrollController.position.atEdge &&
+        _scrollController.position.pixels == 0) {
+      _fabController.reverse();
+    } else {
+      _fabController.forward();
+    }
+  }
+
   Future<void> _getData() async {
-    rotateController.repeat();
+    _rotateController.repeat();
     var credentials = await CredentialsSecureStorage.getCredentials();
     var sheetID = await CredentialsSecureStorage.getSheetID();
 
@@ -76,7 +96,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
       rows = fetchedRows;
       totals = totalsCols;
     });
-    rotateController.forward(from: rotateController.value);
+    _rotateController.forward(from: _rotateController.value);
   }
 
   bool expanded = false;
@@ -86,7 +106,6 @@ class _BalancesOverviewState extends State<BalancesOverview>
       _maxAppBarHeight = EXPANDED_APP_BAR_HEIGHT;
   Offset _offset = Offset(0, _minHeight);
   Offset _appBarOffset = Offset(0, _minHeight);
-  bool _isOpen = false;
   bool _isAppBarOpen = false;
 
   @override
@@ -101,42 +120,44 @@ class _BalancesOverviewState extends State<BalancesOverview>
                   child: isLoading
                       ? LinearProgressIndicator()
                       : RefreshIndicator(
-                          child: ListView(
-                              children: rows
-                                  .map((e) => (e[0] == rows.first[0])
+                          child: ListView.builder(
+                              controller: _scrollController,
+                              itemBuilder: (context, index) =>
+                                  (rows[index][0] == rows.first[0])
                                       ? Padding(
                                           padding: const EdgeInsets.only(
                                               top: kToolbarHeight),
-                                          child: BalanceRow(e),
+                                          child: BalanceRow(rows[index]),
                                         )
-                                      : (e[0] == rows.last[0])
+                                      : (rows[index][0] == rows.last[0])
                                           ? Padding(
                                               padding: const EdgeInsets.only(
                                                   bottom: kToolbarHeight),
-                                              child: BalanceRow(e),
+                                              child: BalanceRow(rows[index]),
                                             )
-                                          : BalanceRow(e))
-                                  .toList()),
+                                          : BalanceRow(rows[index])),
                           onRefresh: _getData))),
           GestureDetector(
             onPanUpdate: (details) {
               _offset = Offset(0, _offset.dy - details.delta.dy);
               if (_offset.dy < _minHeight) {
                 _offset = Offset(0, _minHeight);
-                _isOpen = false;
               } else if (_offset.dy > _maxHeight) {
                 _offset = Offset(0, _maxHeight);
-                _isOpen = true;
               }
               setState(() {});
             },
             onPanEnd: (details) {
               if (_offset.dy < (_maxHeight - _minHeight) * 0.75) {
                 _offset = Offset(0, _minHeight);
-                _isOpen = false;
+                if (!(_scrollController.position.atEdge &&
+                    _scrollController.position.pixels == 0))
+                  _fabController.forward();
               } else if (_offset.dy > (_maxHeight - _minHeight) * 0.25) {
                 _offset = Offset(0, _maxHeight);
-                _isOpen = true;
+                if (!(_scrollController.position.atEdge &&
+                    _scrollController.position.pixels == 0))
+                  _fabController.reverse();
               }
               setState(() {});
             },
@@ -198,10 +219,12 @@ class _BalancesOverviewState extends State<BalancesOverview>
                   lines: totals,
                   height: _appBarOffset.dy,
                   actions: [
-                    SpinningIconButton(
-                      controller: rotateController,
-                      iconData: Icons.sync,
-                      onPressed: _getData
+                    ScaleTransition(
+                      scale: _fabAnimation,
+                      child: SpinningIconButton(
+                          controller: _rotateController,
+                          iconData: Icons.sync,
+                          onPressed: _getData),
                     )
                   ],
                 ),
@@ -210,6 +233,23 @@ class _BalancesOverviewState extends State<BalancesOverview>
           ),
         ],
       ),
+      floatingActionButton: ScaleTransition(
+        scale: _fabAnimation,
+        child: FloatingActionButton(
+          child: Icon(
+            Icons.keyboard_arrow_up,
+            size: 35,
+          ),
+          onPressed: scrollUp,
+        ),
+      ),
     );
+  }
+
+  void scrollUp() {
+    final double start = 0;
+
+    _scrollController.animateTo(start,
+        duration: Duration(seconds: 1), curve: Curves.easeIn);
   }
 }

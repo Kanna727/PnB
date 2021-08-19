@@ -57,6 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey();
   bool checkingCredentials = true;
   bool awaitingCredentials = false;
+  bool saveSheetID = false;
   var _pageController = PageController();
   TextEditingController _sheetIDController = TextEditingController();
   TextEditingController _credentialsController = TextEditingController();
@@ -75,11 +76,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _getCredentials() async {
     var credentials = await CredentialsSecureStorage.getCredentials();
+    var sheetID = await CredentialsSecureStorage.getSheetID();
+    var _saveSheetID = await CredentialsSecureStorage.getSaveSheetID();
 
     if (credentials == null) {
       setState(() {
+        _sheetIDController.text = sheetID ?? "";
         checkingCredentials = true;
         awaitingCredentials = true;
+        saveSheetID = _saveSheetID == 'true' ? true : false;
       });
     } else {
       final isAuthenticated = await LocalAuthApi.authenticate();
@@ -91,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<void> _setCredentials({credentials, sheetID}) async {
+  Future<void> _setCredentials({credentials, sheetID, isDummy=false}) async {
     try {
       setState(() {
         awaitingCredentials = false;
@@ -105,6 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
           credentials ?? _credentialsController.text);
       await CredentialsSecureStorage.setSheetID(
           sheetID ?? _sheetIDController.text);
+      await CredentialsSecureStorage.setSaveSheetID(isDummy ? 'false' : saveSheetID.toString());
       setState(() {
         checkingCredentials = false;
       });
@@ -141,12 +147,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextField(
-                              onChanged: (value) {
-                                setState(() {
-                                  _sheetIDController.text = value;
-                                });
-                              },
-                              decoration: InputDecoration(hintText: "Sheet ID"),
+                              controller: _sheetIDController,
+                              decoration: InputDecoration(labelText: "Sheet ID"),
                               onSubmitted: (_) =>
                                   FocusScope.of(context).nextFocus(),
                               textInputAction: TextInputAction.next,
@@ -155,17 +157,25 @@ class _MyHomePageState extends State<MyHomePage> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextField(
-                              enabled: _sheetIDController.text != "",
                               onChanged: (value) {
                                 setState(() {
                                   _credentialsController.text = value;
                                 });
                               },
                               decoration:
-                                  InputDecoration(hintText: "Credential"),
+                                  InputDecoration(labelText: "Credential"),
                               onSubmitted: (_) =>
                                   FocusScope.of(context).unfocus(),
                             ),
+                          ),
+                          CheckboxListTile(
+                            title: Text("Save Sheet ID"),
+                            value: saveSheetID,
+                            onChanged: (newValue) {
+                              setState(() {
+                                saveSheetID = newValue!;
+                              });
+                            },
                           ),
                           ElevatedButton(
                               onPressed: () async {
@@ -174,7 +184,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                         .loadString(
                                             "assets/dummy_credentials.json");
                                 await _setCredentials(
-                                    credentials: credentials, sheetID: DEMO_SHEET_ID);
+                                    credentials: credentials,
+                                    sheetID: DEMO_SHEET_ID,
+                                    isDummy: true);
                               },
                               child: Text('Use Demo Sheet'))
                         ],

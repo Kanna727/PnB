@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 
 const CREDENTIALS_KEY = '_ck';
 const SHEET_ID_KEY = '_sid';
+const SAVE_SHEET_ID_KEY = '_ssid';
 
 const DEMO_SHEET_ID = '1EVXhh0ohA-nBv3KyeMkFssTEf0BSVG3S4yjKHVmmLaY';
 
@@ -106,4 +107,5 @@ class UI_TEXTS {
   static const NOTE_ERROR = 'Please select some note';
   static const TRANSACTION_SAVED = "Transaction saved";
   static const MAB_SHORTFALL = "MAB Shortfall";
+  static const PERMISSION_ERROR = "You do not have enough permissions to perform this action";
 }

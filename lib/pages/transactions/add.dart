@@ -444,81 +444,95 @@ class _AddTransactionState extends State<AddTransaction> {
   void onSave() async {
     if (isLoading || isRefreshing) return;
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        isSaving = true;
-      });
-      var destColIndex = TYPES_DESTINATION_COLUMNS[type]!;
-      var destinationCol = await transactionsSheet.values
-          .column(destColIndex, fromRow: TRANSACTIONS_START_ROW);
+      try {
+        setState(() {
+          isSaving = true;
+        });
+        var destColIndex = TYPES_DESTINATION_COLUMNS[type]!;
+        var destinationCol = await transactionsSheet.values
+            .column(destColIndex, fromRow: TRANSACTIONS_START_ROW);
 
-      var data = [];
-      if (type == TYPES_CLASS.INCOME) {
-        data = [
-          item,
-          _amountController.text,
-          date,
-          creditAccount,
-          _noteController.text,
-          toBeCredited,
-        ];
-      } else if (type == TYPES_CLASS.EXPENSE) {
-        data = [
-          item,
-          _amountController.text,
-          date,
-          debitAccount,
-          _noteController.text,
-          toBeDebited,
-        ];
-      } else if (type == TYPES_CLASS.LIABILITY) {
-        data = [
-          item,
-          _amountController.text,
-          date,
-          debitAccount,
-          toBeDebited,
-          toBeCredited
-        ];
-      } else if (type == TYPES_CLASS.SAVINGS) {
-        data = [
-          item,
-          _amountController.text,
-          date,
-          debitAccount,
-          creditAccount
-        ];
-      } else if (type == TYPES_CLASS.SELF_TRANSFER) {
-        data = [
-          _amountController.text,
-          date,
-          debitAccount,
-          creditAccount,
-          _noteController.text,
-          toBeDebited,
-          toBeCredited,
-        ];
-      } else if (type == TYPES_CLASS.REWARD_POINTS) {
-        data = [
-          _amountController.text,
-          date,
-          creditAccount,
-          _noteController.text,
-          toBeCredited,
-        ];
+        var data = [];
+        if (type == TYPES_CLASS.INCOME) {
+          data = [
+            item,
+            _amountController.text,
+            date,
+            creditAccount,
+            _noteController.text,
+            toBeCredited,
+          ];
+        } else if (type == TYPES_CLASS.EXPENSE) {
+          data = [
+            item,
+            _amountController.text,
+            date,
+            debitAccount,
+            _noteController.text,
+            toBeDebited,
+          ];
+        } else if (type == TYPES_CLASS.LIABILITY) {
+          data = [
+            item,
+            _amountController.text,
+            date,
+            debitAccount,
+            toBeDebited,
+            toBeCredited
+          ];
+        } else if (type == TYPES_CLASS.SAVINGS) {
+          data = [
+            item,
+            _amountController.text,
+            date,
+            debitAccount,
+            creditAccount
+          ];
+        } else if (type == TYPES_CLASS.SELF_TRANSFER) {
+          data = [
+            _amountController.text,
+            date,
+            debitAccount,
+            creditAccount,
+            _noteController.text,
+            toBeDebited,
+            toBeCredited,
+          ];
+        } else if (type == TYPES_CLASS.REWARD_POINTS) {
+          data = [
+            _amountController.text,
+            date,
+            creditAccount,
+            _noteController.text,
+            toBeCredited,
+          ];
+        }
+
+        await transactionsSheet.values.insertRow(
+            destinationCol.length + 3, data,
+            fromColumn: destColIndex);
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(UI_TEXTS.TRANSACTION_SAVED)));
+
+        setState(() {
+          isSaving = false;
+        });
+
+        if (widget.postAddTrasnactionCallback != null)
+          widget.postAddTrasnactionCallback();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(UI_TEXTS.PERMISSION_ERROR,
+              style: TextStyle(
+                color: Colors.white,
+              )),
+          backgroundColor: Colors.redAccent,
+        ));
+        setState(() {
+          isSaving = false;
+        });
       }
-
-      await transactionsSheet.values
-          .insertRow(destinationCol.length + 3, data, fromColumn: destColIndex);
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(UI_TEXTS.TRANSACTION_SAVED)));
-
-      setState(() {
-        isSaving = false;
-      });
-
-      if (widget.postAddTrasnactionCallback != null)
-        widget.postAddTrasnactionCallback();
     }
   }
 }

@@ -38,3 +38,5 @@ The URL for demo sheet: https://docs.google.com/spreadsheets/d/1EVXhh0ohA-nBv3Ky
 ### Dev setup
 
 You can run & debug the project just like a typical flutter project. If you want to use the demo sheet, kindly request me for credentials at chitturiprasanth13797@gmail.com
+
+> NOTE: You will be able to login by providing any dummy credentials for a read only sheet shared with anyone.

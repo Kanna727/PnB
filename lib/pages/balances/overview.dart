@@ -21,7 +21,8 @@ late Spreadsheet spreadsheet;
 late Worksheet assetManagementSheet;
 
 class BalancesOverview extends StatefulWidget {
-  const BalancesOverview({Key? key}) : super(key: key);
+  GlobalKey<ScaffoldState>? scaffoldKey;
+  BalancesOverview({this.scaffoldKey, Key? key}) : super(key: key);
 
   @override
   _BalancesOverviewState createState() => _BalancesOverviewState();
@@ -140,7 +141,8 @@ class _BalancesOverviewState extends State<BalancesOverview>
   Widget build(BuildContext context) {
     _maxHeight = MediaQuery.of(context).size.height - EXPANDED_APP_BAR_HEIGHT;
     _minAppBarHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
-    if(_appBarOffset.dy == kToolbarHeight) _appBarOffset = Offset(0, _minAppBarHeight);
+    if (_appBarOffset.dy == kToolbarHeight)
+      _appBarOffset = Offset(0, _minAppBarHeight);
     _maxAppBarHeight = _showSearchBar
         ? _minHeight + SEARCH_WIDGET_HEIGHT
         : query == ''
@@ -281,6 +283,11 @@ class _BalancesOverviewState extends State<BalancesOverview>
                   onSearch: searchAccounts,
                   showSearchBar: _showSearchBar,
                   searchBarFocusNode: _searchBoxFocusNode,
+                  leading: IconButton(
+                      icon: Icon(Icons.menu),
+                      onPressed: () {
+                        widget.scaffoldKey?.currentState?.openDrawer();
+                      }),
                   actions: [
                     ScaleTransition(
                       scale: _syncAnimation,

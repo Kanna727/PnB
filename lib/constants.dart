@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 const CREDENTIALS_KEY = '_ck';
 const SHEET_ID_KEY = '_sid';
 
+const DEMO_SHEET_ID = '1EVXhh0ohA-nBv3KyeMkFssTEf0BSVG3S4yjKHVmmLaY';
+
 class WORKSHEET_TITLES {
   static const ASSET_MANAGEMENT = "Asset Management";
   static const TRANSACTIONS = "Transactions";

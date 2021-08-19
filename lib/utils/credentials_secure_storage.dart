@@ -10,9 +10,13 @@ class CredentialsSecureStorage {
   static Future<String?> getCredentials() async =>
       await _storage.read(key: CREDENTIALS_KEY);
 
+
   static Future setSheetID(String sheetID) async =>
       await _storage.write(key: SHEET_ID_KEY, value: sheetID);
 
   static Future<String?> getSheetID() async =>
       await _storage.read(key: SHEET_ID_KEY);
+
+  static Future<void> deleteAll() async =>
+      await _storage.deleteAll();
 }

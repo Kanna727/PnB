@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -5,6 +7,7 @@ import 'package:portfolio_n_budget/api/gsheets.dart';
 import 'package:portfolio_n_budget/constants.dart';
 import 'package:portfolio_n_budget/utils/credentials_secure_storage.dart';
 import 'package:portfolio_n_budget/api/localAuth.dart';
+import 'package:portfolio_n_budget/widgets/frostedDrawer.dart';
 
 import 'pages/balances/overview.dart';
 
@@ -27,6 +30,22 @@ class MyApp extends StatelessWidget {
   }
 }
 
+Route routes(RouteSettings settings) {
+  if (settings.name == '/login') {
+    return MaterialPageRoute(
+      builder: (context) {
+        return MyHomePage();
+      },
+    );
+  } else {
+    return MaterialPageRoute(
+      builder: (context) {
+        return MyHomePage();
+      },
+    );
+  }
+}
+
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key}) : super(key: key);
 
@@ -35,6 +54,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey();
   bool checkingCredentials = true;
   bool awaitingCredentials = false;
   var _pageController = PageController();
@@ -58,11 +78,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (credentials == null) {
       setState(() {
+        checkingCredentials = true;
         awaitingCredentials = true;
       });
     } else {
       final isAuthenticated = await LocalAuthApi.authenticate();
-      if(isAuthenticated) {
+      if (isAuthenticated) {
         setState(() {
           checkingCredentials = false;
         });
@@ -70,9 +91,43 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<void> _setCredentials({credentials, sheetID}) async {
+    try {
+      setState(() {
+        awaitingCredentials = false;
+      });
+      final gsheets = GSheets(credentials ?? _credentialsController.text);
+      var spreadsheet =
+          await gsheets.spreadsheet(sheetID ?? _sheetIDController.text);
+
+      spreadsheet.worksheetByTitle(WORKSHEET_TITLES.ASSET_MANAGEMENT);
+      await CredentialsSecureStorage.setCredentials(
+          credentials ?? _credentialsController.text);
+      await CredentialsSecureStorage.setSheetID(
+          sheetID ?? _sheetIDController.text);
+      setState(() {
+        checkingCredentials = false;
+      });
+    } catch (err) {
+      setState(() {
+        awaitingCredentials = true;
+      });
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text("Incorrect credentials"),
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: scaffoldKey,
+        drawerScrimColor: Colors.transparent,
         body: checkingCredentials == true
             ? Center(
                 child: !awaitingCredentials
@@ -111,11 +166,21 @@ class _MyHomePageState extends State<MyHomePage> {
                               onSubmitted: (_) =>
                                   FocusScope.of(context).unfocus(),
                             ),
-                          )
+                          ),
+                          ElevatedButton(
+                              onPressed: () async {
+                                String credentials =
+                                    await DefaultAssetBundle.of(context)
+                                        .loadString(
+                                            "assets/dummy_credentials.json");
+                                await _setCredentials(
+                                    credentials: credentials, sheetID: DEMO_SHEET_ID);
+                              },
+                              child: Text('Use Demo Sheet'))
                         ],
                       ),
               )
-            : BalancesOverview(),
+            : BalancesOverview(scaffoldKey: scaffoldKey),
         floatingActionButton: Visibility(
             visible: awaitingCredentials,
             child: FloatingActionButton(
@@ -124,39 +189,37 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: _credentialsController.text == ""
                   ? null
                   : () async {
-                      try {
-                        setState(() {
-                          awaitingCredentials = false;
-                        });
-                        final gsheets = GSheets(_credentialsController.text);
-                        var spreadsheet =
-                            await gsheets.spreadsheet(_sheetIDController.text);
-
-                        spreadsheet.worksheetByTitle(
-                            WORKSHEET_TITLES.ASSET_MANAGEMENT);
-                        await CredentialsSecureStorage.setCredentials(
-                            _credentialsController.text);
-                        await CredentialsSecureStorage.setSheetID(
-                            _sheetIDController.text);
-                        setState(() {
-                          checkingCredentials = false;
-                        });
-                      } catch (err) {
-                        setState(() {
-                          awaitingCredentials = true;
-                        });
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              content: Text("Incorrect credentials"),
-                            );
-                          },
-                        );
-                      }
+                      await _setCredentials();
                     },
               tooltip: 'Show me the value!',
               child: const Icon(Icons.save),
-            )));
+            )),
+        drawer: FrostedDrawer(
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: Container(),
+              ),
+              Container(
+                  child: Align(
+                      alignment: FractionalOffset.bottomCenter,
+                      child: Container(
+                          child: Column(
+                        children: <Widget>[
+                          Divider(),
+                          ListTile(
+                            leading: Icon(Icons.power_settings_new),
+                            title: Text('Logout'),
+                            onTap: () async {
+                              await CredentialsSecureStorage.deleteAll();
+                              _getCredentials();
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      ))))
+            ],
+          ),
+        ));
   }
 }

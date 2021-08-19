@@ -164,7 +164,7 @@ jobs:
 
     - name: Add demo credentials
       run: |
-        echo "$DUMMY_CREDENTIALS" > app/dummy_credentials.json
+        echo "$DUMMY_CREDENTIALS" > dummy_credentials.json
       env:
         DUMMY_CREDENTIALS: ${{ secrets.DUMMY_CREDENTIALS }}
       working-directory: assets

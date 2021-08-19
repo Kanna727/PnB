@@ -6,7 +6,6 @@ import 'package:portfolio_n_budget/constants.dart';
 import 'package:portfolio_n_budget/widgets/searchWidget.dart';
 
 class FrostedAppBar extends StatefulWidget {
-  //
   double? height;
   Widget? leading;
   List<Widget>? actions;

@@ -15,4 +15,19 @@ class CredentialsSecureStorage {
 
   static Future<String?> getSheetID() async =>
       await _storage.read(key: SHEET_ID_KEY);
+
+  static Future setSaveSheetID(String save) async =>
+      await _storage.write(key: SAVE_SHEET_ID_KEY, value: save);
+
+  static Future<String?> getSaveSheetID() async =>
+      await _storage.read(key: SAVE_SHEET_ID_KEY);
+
+  static Future<void> deleteAll() async {
+    var saveSheetID = await getSaveSheetID();
+    if (saveSheetID == 'true') {
+      await _storage.delete(key: CREDENTIALS_KEY);
+    } else {
+      await _storage.deleteAll();
+    }
+  }
 }

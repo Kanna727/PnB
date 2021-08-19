@@ -162,6 +162,13 @@ jobs:
       run: sed -i 's/99.99.99+99/${{ steps.tagName.outputs.group1 }}/g' pubspec.yaml
     - run: flutter pub get
 
+    - name: Add demo credentials
+      run: |
+        echo "$DUMMY_CREDENTIALS" > app/dummy_credentials.json
+      env:
+        DUMMY_CREDENTIALS: ${{ secrets.DUMMY_CREDENTIALS }}
+      working-directory: assets
+
     - name: Configure Keystore for Android
       if: matrix.target == 'Android'
       run: |

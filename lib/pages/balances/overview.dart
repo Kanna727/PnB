@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import 'package:portfolio_n_budget/api/gsheets.dart';
 import 'package:portfolio_n_budget/constants.dart';
+import 'package:portfolio_n_budget/settings.dart';
 import 'package:portfolio_n_budget/utils/credentials_secure_storage.dart';
 import 'package:portfolio_n_budget/widgets/searchWidget.dart';
 
@@ -53,6 +54,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
   var filteredTotal = [];
   bool _showSearchBar = false;
   var _searchBoxFocusNode = FocusNode();
+  Settings settings = new Settings();
 
   @override
   void initState() {
@@ -92,6 +94,7 @@ class _BalancesOverviewState extends State<BalancesOverview>
     setState(() {
       isSyncing = true;
     });
+    await settings.initSettings();
     _syncController.forward();
     _rotateController.repeat();
     var credentials = await CredentialsSecureStorage.getCredentials();
@@ -101,17 +104,17 @@ class _BalancesOverviewState extends State<BalancesOverview>
     spreadsheet = await gsheets.spreadsheet(sheetID!);
 
     assetManagementSheet =
-        spreadsheet.worksheetByTitle(WORKSHEET_TITLES.ASSET_MANAGEMENT);
+        spreadsheet.worksheetByTitle(settings.settings["worksheetTitles"]["assetManagement"]);
 
     var fetchedRows = await assetManagementSheet.values.allRows(
-        fromRow: BALANCES_TABLE.fromRow,
-        length: BALANCES_TABLE.columnsLength,
+        fromRow: settings.settings["balancesTable"]["fromRow"],
+        length: settings.settings["balancesTable"]["columnsLength"],
         fill: true);
 
     var totalsCols = await assetManagementSheet.values.allRows(
-        fromRow: TOTALS_TABLE.fromRow,
-        fromColumn: TOTALS_TABLE.fromColumn,
-        length: TOTALS_TABLE.columnsLength);
+        fromRow: settings.settings["totalsTable"]["fromRow"],
+        fromColumn: settings.settings["totalsTable"]["fromColumn"],
+        length: settings.settings["totalsTable"]["columnsLength"]);
 
     fetchedRows.removeWhere((element) => element[0] == SALARY_DEDUCTION);
 

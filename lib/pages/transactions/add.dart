@@ -2,8 +2,9 @@ import 'package:currency_text_input_formatter/currency_text_input_formatter.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:portfolio_n_budget/api/gsheets.dart';
-
 import 'package:portfolio_n_budget/constants.dart';
+
+import 'package:portfolio_n_budget/settings.dart';
 import 'package:portfolio_n_budget/utils/credentials_secure_storage.dart';
 import 'package:portfolio_n_budget/widgets/datePicker.dart';
 import 'package:portfolio_n_budget/widgets/dropdown.dart';
@@ -44,6 +45,8 @@ class AddTransaction extends StatefulWidget {
 }
 
 class _AddTransactionState extends State<AddTransaction> {
+  Settings settings = new Settings();
+
   @override
   void initState() {
     super.initState();
@@ -58,6 +61,7 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   Future<void> _getData() async {
+    await settings.initSettings();
     var credentials = await CredentialsSecureStorage.getCredentials();
     var sheetID = await CredentialsSecureStorage.getSheetID();
 
@@ -65,12 +69,12 @@ class _AddTransactionState extends State<AddTransaction> {
     spreadsheet = await gsheets.spreadsheet(sheetID!);
 
     transactionsSheet =
-        spreadsheet.worksheetByTitle(WORKSHEET_TITLES.TRANSACTIONS);
+        spreadsheet.worksheetByTitle(settings.settings["worksheetTitles"]["transactions"]);
     assetManagementSheet =
-        spreadsheet.worksheetByTitle(WORKSHEET_TITLES.ASSET_MANAGEMENT);
+        spreadsheet.worksheetByTitle(settings.settings["worksheetTitles"]["assetManagement"]);
 
     var fetchedNames = await assetManagementSheet.values
-        .column(BALANCES_TABLE.fromColumn, fromRow: BALANCES_TABLE.fromRow);
+        .column(settings.settings["balancesTable"]["fromColumn"], fromRow: settings.settings["balancesTable"]["fromRow"]);
 
     setState(() {
       isLoading = false;
@@ -80,7 +84,7 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   Future<void> _getItems(String type) async {
-    var typeMasterColumn = TYPES_MASTER_COLUMNS[type];
+    var typeMasterColumn = settings.settings["typesMasterColumns"][type];
     if (typeMasterColumn == null) {
       return;
     }
@@ -89,15 +93,15 @@ class _AddTransactionState extends State<AddTransaction> {
       setState(() {
         itemsFetched = false;
       });
-      debtsSheet = spreadsheet.worksheetByTitle(WORKSHEET_TITLES.DEBTS);
+      debtsSheet = spreadsheet.worksheetByTitle(settings.settings["worksheetTitles"]["debts"]);
       fetchedItems = await debtsSheet.values
-          .column(TYPES_MASTER_COLUMNS[type]!, fromRow: DEBTS_TABLE.fromRow);
+          .column(settings.settings["typesMasterColumns"][type]!, fromRow: settings.settings["debtsTable"]["fromRow"]);
     } else {
       setState(() {
         itemsFetched = false;
       });
       fetchedItems = await assetManagementSheet.values
-          .column(typeMasterColumn, fromRow: ASSET_MANAGEMENT_SHEET_START_ROW);
+          .column(typeMasterColumn, fromRow: settings.settings["startRows"]["assetManagementSheet"]);
     }
 
     if (fetchedItems != null) {
@@ -448,9 +452,9 @@ class _AddTransactionState extends State<AddTransaction> {
         setState(() {
           isSaving = true;
         });
-        var destColIndex = TYPES_DESTINATION_COLUMNS[type]!;
+        var destColIndex = settings.settings["typesDestinationColumns"][type]!;
         var destinationCol = await transactionsSheet.values
-            .column(destColIndex, fromRow: TRANSACTIONS_START_ROW);
+            .column(destColIndex, fromRow: settings.settings["startRows"]["transactions"]);
 
         var data = [];
         if (type == TYPES_CLASS.INCOME) {

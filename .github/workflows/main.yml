@@ -73,6 +73,7 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release_id: ${{ steps.create_release.outputs.id }}
     steps:
     - name: Download changelog
       uses: actions/download-artifact@v2
@@ -234,4 +235,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          release_id: ${{ steps.create_release.outputs.id }}
+          release_id: ${{ needs.draft-release.outputs.release_id }}

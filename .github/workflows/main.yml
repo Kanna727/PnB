@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI Test
+name: CI
 
 # Controls when the workflow will run
 on:
@@ -222,3 +222,15 @@ jobs:
         asset_path: ./PnB_${{ matrix.target }}${{ matrix.asset_extension }}
         asset_name: PnB_${{ matrix.target }}${{ matrix.asset_extension }}
         asset_content_type: ${{ matrix.asset_content_type }}
+
+  publish-release:
+    if: github.event.pull_request.merged == true
+    name: Publish Github release
+    needs: create-build
+    runs-on: ubuntu-20.04
+    - name: Publish release
+      uses: eregon/publish-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        release_id: ${{ steps.create_release.outputs.id }}

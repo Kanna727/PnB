@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 const CREDENTIALS_KEY = '_ck';
 const SHEET_ID_KEY = '_sid';
 const SAVE_SHEET_ID_KEY = '_ssid';
+const SETTINGS_KEY = '_sk';
 
 const DEMO_SHEET_ID = '1EVXhh0ohA-nBv3KyeMkFssTEf0BSVG3S4yjKHVmmLaY';
 
@@ -117,14 +118,17 @@ class UI_TEXTS {
   static const SETTINGS = 'Settings';
   static const LOGOUT = 'Logout';
   static const SENSITIVE_SETTINGS = '  Sensitive Settings ';
-  static const SETTINGS_CAUTION = 'The changes you are about to change are extremely sensitive and can alter your spreadsheet. Proceed with caution.';
-  static const SETTINGS_AUTHORIZE_SAVE = "NOTE: As a security measure, every time you change any setting, you need authenticate yourself using your device's security";
+  static const SETTINGS_CAUTION =
+      'The changes you are about to change are extremely sensitive and can alter your spreadsheet. Proceed with caution.';
+  static const SETTINGS_AUTHORIZE_SAVE =
+      "NOTE: As a security measure, every time you change any setting, you need authenticate yourself using your device's security";
   static const PROCEED = "Proceed";
   static const CONFIRM_LOGOUT_TITLE = '  Confirm Logout ';
   static const CONFIRM_LOGOUT_MESSAGE = "Are you sure you want to logout?";
   static const RESTORE_DEFAULTS = 'Restore Defaults';
   static const CONFIRM_RESTORE_TITLE = '  Confirm Restore ';
-  static const CONFIRM_RESTORE_MESSAGE = "Are you sure you want to restore the default settings?";
+  static const CONFIRM_RESTORE_MESSAGE =
+      "Are you sure you want to restore the default settings?";
   static const RESTORE = 'Restore';
   static const WORKSHEET_TITLES = "Worksheet Titles";
   static const TYPES_MASTER_COLUMNS = "Types: Master Columns";

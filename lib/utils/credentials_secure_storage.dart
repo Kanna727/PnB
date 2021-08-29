@@ -25,10 +25,10 @@ class CredentialsSecureStorage {
       await _storage.read(key: SAVE_SHEET_ID_KEY);
 
   static Future setSettings(Map settings) async =>
-      await _storage.write(key: SAVE_SHEET_ID_KEY, value: jsonEncode(settings));
+      await _storage.write(key: SETTINGS_KEY, value: jsonEncode(settings));
 
   static Future<dynamic> getSettings() async {
-    var settingsString = await _storage.read(key: SAVE_SHEET_ID_KEY);
+    var settingsString = await _storage.read(key: SETTINGS_KEY);
     if (settingsString == null) {
       return false;
     }

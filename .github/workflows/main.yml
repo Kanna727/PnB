@@ -227,7 +227,7 @@ jobs:
   publish-release:
     if: github.event.pull_request.merged == true
     name: Publish Github release
-    needs: create-build
+    needs: [create-build, draft-release]
     runs-on: ubuntu-20.04
     steps:
       - name: Publish release

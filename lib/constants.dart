@@ -16,7 +16,7 @@ const TYPES = [
   "Income",
   "Expense",
   "Liability",
-  // "Savings",
+  "Savings",
   "Self Transfer",
   "Reward Points"
 ];
@@ -42,8 +42,8 @@ const TYPES_DESTINATION_COLUMNS = {
   "Expense": 8,
   "Liability": 15,
   "Savings": 22,
-  "Self Transfer": 32,
-  "Reward Points": 40,
+  "Self Transfer": 30,
+  "Reward Points": 38,
 };
 
 String getCurrencyFormat(String val) {
@@ -107,5 +107,32 @@ class UI_TEXTS {
   static const NOTE_ERROR = 'Please select some note';
   static const TRANSACTION_SAVED = "Transaction saved";
   static const MAB_SHORTFALL = "MAB Shortfall";
-  static const PERMISSION_ERROR = "You do not have enough permissions to perform this action";
+  static const PERMISSION_ERROR =
+      "You do not have enough permissions to perform this action";
+  static const INCORRECT_CREDENTIALS = "Incorrect credentials";
+  static const CREDENTIALS_REQUIRED = "Spreasheet credentials required";
+  static const CREDENTIAL = "credential";
+  static const SAVE_SHEET_ID = "Save Sheet ID";
+  static const USE_DEMO_SHEET = 'Use Demo Sheet';
+  static const SETTINGS = 'Settings';
+  static const LOGOUT = 'Logout';
+  static const SENSITIVE_SETTINGS = '  Sensitive Settings ';
+  static const SETTINGS_CAUTION = 'The changes you are about to change are extremely sensitive and can alter your spreadsheet. Proceed with caution.';
+  static const SETTINGS_AUTHORIZE_SAVE = "NOTE: As a security measure, every time you change any setting, you need authenticate yourself using your device's security";
+  static const PROCEED = "Proceed";
+  static const CONFIRM_LOGOUT_TITLE = '  Confirm Logout ';
+  static const CONFIRM_LOGOUT_MESSAGE = "Are you sure you want to logout?";
+  static const RESTORE_DEFAULTS = 'Restore Defaults';
+  static const CONFIRM_RESTORE_TITLE = '  Confirm Restore ';
+  static const CONFIRM_RESTORE_MESSAGE = "Are you sure you want to restore the default settings?";
+  static const RESTORE = 'Restore';
+  static const WORKSHEET_TITLES = "Worksheet Titles";
+  static const TYPES_MASTER_COLUMNS = "Types: Master Columns";
+  static const TYPES_DESTINATION_COLUMNS = "Types: Destination Columns";
+  static const BALANCES_TABLE = "Balances Table";
+  static const FROM_ROW = "From Row";
+  static const FROM_COLUMN = "From Column";
+  static const COLUMNS_LENGTH = "Columns Length";
+  static const DEBTS_TABLE = "Debts Table";
+  static const START_ROWS = "Start Rows";
 }

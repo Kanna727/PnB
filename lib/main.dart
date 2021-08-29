@@ -8,8 +8,10 @@ import 'package:portfolio_n_budget/constants.dart';
 import 'package:portfolio_n_budget/utils/credentials_secure_storage.dart';
 import 'package:portfolio_n_budget/api/localAuth.dart';
 import 'package:portfolio_n_budget/widgets/frostedDrawer.dart';
+import 'package:portfolio_n_budget/settings.dart';
 
-import 'pages/balances/overview.dart';
+import 'package:portfolio_n_budget/pages/balances/overview.dart';
+import 'package:portfolio_n_budget/pages/settings/update.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,6 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var _pageController = PageController();
   TextEditingController _sheetIDController = TextEditingController();
   TextEditingController _credentialsController = TextEditingController();
+  Settings settings = new Settings(toInitSettings: true);
 
   @override
   void initState() {
@@ -86,17 +89,21 @@ class _MyHomePageState extends State<MyHomePage> {
         awaitingCredentials = true;
         saveSheetID = _saveSheetID == 'true' ? true : false;
       });
-    } else {
+    } else if (sheetID != DEMO_SHEET_ID) {
       final isAuthenticated = await LocalAuthApi.authenticate();
       if (isAuthenticated) {
         setState(() {
           checkingCredentials = false;
         });
       }
+    } else {
+      setState(() {
+        checkingCredentials = false;
+      });
     }
   }
 
-  Future<void> _setCredentials({credentials, sheetID, isDummy=false}) async {
+  Future<void> _setCredentials({credentials, sheetID, isDummy = false}) async {
     try {
       setState(() {
         awaitingCredentials = false;
@@ -110,7 +117,8 @@ class _MyHomePageState extends State<MyHomePage> {
           credentials ?? _credentialsController.text);
       await CredentialsSecureStorage.setSheetID(
           sheetID ?? _sheetIDController.text);
-      await CredentialsSecureStorage.setSaveSheetID(isDummy ? 'false' : saveSheetID.toString());
+      await CredentialsSecureStorage.setSaveSheetID(
+          isDummy ? 'false' : saveSheetID.toString());
       setState(() {
         checkingCredentials = false;
       });
@@ -122,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            content: Text("Incorrect credentials"),
+            content: Text(UI_TEXTS.INCORRECT_CREDENTIALS),
           );
         },
       );
@@ -141,14 +149,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Spreasheet credential required',
+                          Text(UI_TEXTS.CREDENTIALS_REQUIRED,
                               style: TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold)),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextField(
                               controller: _sheetIDController,
-                              decoration: InputDecoration(labelText: "Sheet ID"),
+                              decoration:
+                                  InputDecoration(labelText: "Sheet ID"),
                               onSubmitted: (_) =>
                                   FocusScope.of(context).nextFocus(),
                               textInputAction: TextInputAction.next,
@@ -163,13 +172,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                 });
                               },
                               decoration:
-                                  InputDecoration(labelText: "Credential"),
+                                  InputDecoration(labelText: UI_TEXTS.CREDENTIAL),
                               onSubmitted: (_) =>
                                   FocusScope.of(context).unfocus(),
                             ),
                           ),
                           CheckboxListTile(
-                            title: Text("Save Sheet ID"),
+                            title: Text(UI_TEXTS.SAVE_SHEET_ID),
                             value: saveSheetID,
                             onChanged: (newValue) {
                               setState(() {
@@ -188,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     sheetID: DEMO_SHEET_ID,
                                     isDummy: true);
                               },
-                              child: Text('Use Demo Sheet'))
+                              child: Text(UI_TEXTS.USE_DEMO_SHEET))
                         ],
                       ),
               )
@@ -203,7 +212,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   : () async {
                       await _setCredentials();
                     },
-              tooltip: 'Show me the value!',
               child: const Icon(Icons.save),
             )),
         drawer: FrostedDrawer(
@@ -220,12 +228,19 @@ class _MyHomePageState extends State<MyHomePage> {
                         children: <Widget>[
                           Divider(),
                           ListTile(
-                            leading: Icon(Icons.power_settings_new),
-                            title: Text('Logout'),
+                            leading: Icon(Icons.settings),
+                            title: Text(UI_TEXTS.SETTINGS),
                             onTap: () async {
-                              await CredentialsSecureStorage.deleteAll();
-                              _getCredentials();
                               Navigator.pop(context);
+                              await _showSettingsWarnDialog();
+                            },
+                          ),
+                          ListTile(
+                            leading: Icon(Icons.power_settings_new),
+                            title: Text(UI_TEXTS.LOGOUT),
+                            onTap: () async {
+                              Navigator.pop(context);
+                              await _showLogoutWarnDialog();
                             },
                           ),
                         ],
@@ -233,5 +248,81 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ));
+  }
+
+  Future<void> _showSettingsWarnDialog() async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(children: [
+            Icon(Icons.warning_amber, color: Colors.amber),
+            Text(UI_TEXTS.SENSITIVE_SETTINGS)
+          ]),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Text(
+                      UI_TEXTS.SETTINGS_CAUTION),
+                ),
+                Text(
+                    UI_TEXTS.SETTINGS_AUTHORIZE_SAVE),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(UI_TEXTS.PROCEED),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) =>
+                        UpdateSettings(updateSettingsCallback: () async {
+                      await _getCredentials();
+                      Navigator.of(context).pop();
+                      // BalancesOverview.scaffoldKey.currentState._getData();
+                    }),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showLogoutWarnDialog() async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(children: [
+            Icon(Icons.warning_amber, color: Colors.amber),
+            Text(UI_TEXTS.CONFIRM_LOGOUT_TITLE)
+          ]),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(UI_TEXTS.CONFIRM_LOGOUT_MESSAGE),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(UI_TEXTS.LOGOUT),
+              onPressed: () async {
+                await CredentialsSecureStorage.deleteAll();
+                _getCredentials();
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
